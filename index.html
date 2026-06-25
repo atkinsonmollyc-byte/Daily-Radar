@@ -1,0 +1,3772 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Daily Radar</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --background: #ffffff;
+        --text: #000000;
+        --muted: #555555;
+        --border: #d7d7d7;
+        --soft: #f5f5f5;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--background);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.5;
+      }
+
+      body.accessibility-dyslexia-font {
+        font-family: Verdana, Arial, Helvetica, sans-serif;
+        letter-spacing: 0.01em;
+      }
+
+      body.accessibility-larger-text {
+        font-size: 1.12rem;
+      }
+
+      body.accessibility-larger-text h1,
+      body.accessibility-larger-text .digest-heading h2,
+      body.accessibility-larger-text .read-later-header h2,
+      body.accessibility-larger-text .history-header h2,
+      body.accessibility-larger-text .settings-header h2 {
+        font-size: clamp(2.3rem, 8vw, 5rem);
+      }
+
+      body.accessibility-larger-text .article-card h2 {
+        font-size: 1.45rem;
+      }
+
+      body.accessibility-larger-text .article-group h3,
+      body.accessibility-larger-text .settings-card h3,
+      body.accessibility-larger-text .insights-title {
+        font-size: 1.75rem;
+      }
+
+      body.accessibility-high-contrast {
+        --muted: #111111;
+        --border: #000000;
+        --soft: #eeeeee;
+      }
+
+      body.accessibility-reduced-motion *,
+      body.accessibility-reduced-motion *::before,
+      body.accessibility-reduced-motion *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+        animation: none !important;
+      }
+
+      body.accessibility-reduced-motion .loading-spinner {
+        border-style: solid;
+      }
+
+      body.accessibility-comfortable-spacing .article-card,
+      body.accessibility-comfortable-spacing .analytics-card,
+      body.accessibility-comfortable-spacing .article-preview {
+        padding: 24px;
+      }
+
+      body.accessibility-comfortable-spacing .article-list,
+      body.accessibility-comfortable-spacing .read-later-list,
+      body.accessibility-comfortable-spacing .history-list,
+      body.accessibility-comfortable-spacing .digest,
+      body.accessibility-comfortable-spacing .article-actions,
+      body.accessibility-comfortable-spacing .chips {
+        gap: 16px;
+      }
+
+      body.accessibility-comfortable-spacing .chip,
+      body.accessibility-comfortable-spacing .secondary-action,
+      body.accessibility-comfortable-spacing .article-action,
+      body.accessibility-comfortable-spacing .reset-preferences,
+      body.accessibility-comfortable-spacing .back-button {
+        padding: 12px 16px;
+      }
+
+      body.accessibility-underline-links a {
+        text-decoration: underline;
+        text-underline-offset: 0.18em;
+      }
+
+      main {
+        width: min(920px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      .digest-mode main {
+        width: min(1180px, calc(100% - 32px));
+      }
+
+      header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 24px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(2rem, 8vw, 4.5rem);
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .intro {
+        max-width: 560px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+
+      .controls {
+        padding: 28px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .section-label {
+        display: block;
+        margin-bottom: 12px;
+        font-weight: 700;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .topic-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .chip {
+        appearance: none;
+        border: 1px solid var(--text);
+        border-radius: 999px;
+        background: var(--background);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        padding: 9px 14px;
+        transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+      }
+
+      .chip:hover,
+      .chip:focus-visible {
+        transform: translateY(-1px);
+      }
+
+      .chip:focus-visible,
+      .generate:focus-visible {
+        outline: 3px solid var(--text);
+        outline-offset: 3px;
+      }
+
+      .chip[aria-pressed="true"] {
+        background: var(--text);
+        color: var(--background);
+        box-shadow: inset 0 0 0 2px var(--background);
+      }
+
+      .chip.is-priority {
+        outline: 2px solid var(--text);
+        outline-offset: 3px;
+      }
+
+      .pin-button {
+        display: none;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--background);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 0.95rem;
+        line-height: 1;
+      }
+
+      .topic-control.is-selected .pin-button {
+        display: inline-grid;
+      }
+
+      .pin-button[aria-pressed="true"] {
+        border-color: var(--text);
+        background: var(--text);
+        color: var(--background);
+      }
+
+      .pin-button:focus-visible {
+        outline: 3px solid var(--text);
+        outline-offset: 3px;
+      }
+
+      .sub-interests {
+        border-left: 3px solid var(--text);
+        margin: -4px 0 22px;
+        padding: 12px 0 2px 14px;
+      }
+
+      .sub-interests[hidden] {
+        display: none;
+      }
+
+      .sub-label {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--muted);
+        font-size: 0.95rem;
+        font-weight: 700;
+      }
+
+      .sub-chips {
+        margin-bottom: 0;
+      }
+
+      .sub-chip {
+        font-size: 0.92rem;
+        padding: 7px 12px;
+      }
+
+      .generate {
+        appearance: none;
+        width: 100%;
+        max-width: 240px;
+        border: 1px solid var(--text);
+        border-radius: 6px;
+        background: var(--text);
+        color: var(--background);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+        padding: 12px 18px;
+      }
+
+      .message {
+        min-height: 28px;
+        margin: 16px 0 0;
+        color: var(--muted);
+      }
+
+      .message.error {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .loading-panel {
+        border: 2px solid var(--text);
+        border-radius: 8px;
+        display: grid;
+        gap: 14px;
+        margin: 24px 0;
+        padding: 24px;
+        place-items: center;
+        text-align: center;
+      }
+
+      .loading-panel[hidden] {
+        display: none;
+      }
+
+      .loading-spinner {
+        border: 4px solid var(--border);
+        border-top-color: var(--text);
+        border-radius: 999px;
+        height: 48px;
+        width: 48px;
+        animation: radar-spin 900ms linear infinite;
+      }
+
+      .loading-panel h2 {
+        margin: 0;
+      }
+
+      .loading-steps {
+        color: var(--muted);
+        display: grid;
+        gap: 6px;
+        margin: 0;
+      }
+
+      .loading-steps p {
+        margin: 0;
+      }
+
+      @keyframes radar-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .preferences-bar {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+        margin-top: 16px;
+      }
+
+      .welcome-message {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin: 0;
+      }
+
+      .welcome-message[hidden] {
+        display: none;
+      }
+
+      .reset-preferences {
+        appearance: none;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--background);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        padding: 8px 12px;
+      }
+
+      .secondary-action,
+      .article-action,
+      .preview-close,
+      .remove-saved {
+        appearance: none;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--background);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        padding: 8px 12px;
+      }
+
+      .article-action[disabled] {
+        color: var(--muted);
+        cursor: default;
+      }
+
+      a.article-action {
+        display: inline-block;
+        text-decoration: none;
+      }
+
+      .reset-preferences:focus-visible,
+      .secondary-action:focus-visible,
+      .article-action:focus-visible,
+      .preview-close:focus-visible,
+      .remove-saved:focus-visible,
+      .digest-settings-button:focus-visible,
+      .settings-close:focus-visible,
+      .back-button:focus-visible,
+      .setting-toggle input:focus-visible + .toggle-text {
+        outline: 3px solid var(--text);
+        outline-offset: 3px;
+      }
+
+      .priority-topics {
+        border-bottom: 1px solid var(--border);
+        padding: 22px 0 0;
+      }
+
+      .priority-topics[hidden] {
+        display: none;
+      }
+
+      .priority-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+
+      .priority-tag {
+        border: 1px solid var(--text);
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      .digest-layout {
+        display: grid;
+        grid-template-columns: minmax(210px, 260px) 1fr;
+        gap: 28px;
+        min-width: 0;
+        padding-top: 28px;
+      }
+
+      .digest-layout[hidden] {
+        display: none;
+      }
+
+      .digest-mode header,
+      .digest-mode .controls,
+      .digest-mode > main > .priority-topics {
+        display: none;
+      }
+
+      .read-later-mode header,
+      .read-later-mode .controls,
+      .read-later-mode > main > .priority-topics,
+      .read-later-mode .digest-layout,
+      .history-mode header,
+      .history-mode .controls,
+      .history-mode > main > .priority-topics,
+      .history-mode .digest-layout,
+      .history-mode .read-later-layout,
+      .settings-mode header,
+      .settings-mode .controls,
+      .settings-mode > main > .priority-topics,
+      .settings-mode .digest-layout,
+      .settings-mode .read-later-layout,
+      .settings-mode .history-layout {
+        display: none;
+      }
+
+      .digest-sidebar {
+        align-self: start;
+        border-right: 1px solid var(--border);
+        min-width: 0;
+        padding-right: 18px;
+        position: sticky;
+        top: 18px;
+      }
+
+      .digest-layout > div {
+        min-width: 0;
+      }
+
+      .back-button {
+        appearance: none;
+        width: 100%;
+        border: 1px solid var(--text);
+        border-radius: 6px;
+        background: var(--background);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+        margin-bottom: 22px;
+        padding: 10px 12px;
+      }
+
+      .sidebar-actions {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 22px;
+      }
+
+      .topic-nav {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 22px;
+      }
+
+      .topic-link {
+        appearance: none;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--background);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        padding: 9px 10px;
+        text-align: left;
+      }
+
+      .topic-link.is-active {
+        border-color: var(--text);
+        box-shadow: inset 4px 0 0 var(--text);
+        font-weight: 700;
+      }
+
+      .topic-subtext {
+        display: block;
+        color: var(--muted);
+        font-size: 0.85rem;
+        font-weight: 400;
+        margin-top: 3px;
+      }
+
+      .sidebar-priorities {
+        border-top: 1px solid var(--border);
+        padding-top: 18px;
+      }
+
+      .sidebar-priorities[hidden] {
+        display: none;
+      }
+
+      .digest-heading {
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 20px;
+        padding-bottom: 22px;
+        position: relative;
+      }
+
+      .digest-settings-button {
+        align-items: center;
+        appearance: none;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--background);
+        color: var(--text);
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-weight: 700;
+        gap: 6px;
+        line-height: 1;
+        padding: 10px 14px;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+
+      .digest-settings-button::after {
+        content: "Settings";
+      }
+
+      .digest-heading h2 {
+        font-size: clamp(2rem, 6vw, 3.5rem);
+        line-height: 1;
+        margin: 0 0 16px;
+      }
+
+      .digest-heading p {
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .morning-kicker {
+        color: var(--text);
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .brief-date {
+        color: var(--muted);
+        margin-bottom: 18px;
+      }
+
+      .brief-stats {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 20px;
+      }
+
+      .brief-stat {
+        border-top: 1px solid var(--text);
+        padding-top: 8px;
+      }
+
+      .brief-stat strong {
+        display: block;
+        font-size: 1.6rem;
+        line-height: 1;
+      }
+
+      .brief-stat span {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .brief-priorities {
+        margin-bottom: 20px;
+      }
+
+      .brief-priorities[hidden] {
+        display: none;
+      }
+
+      .brief-quality {
+        border-top: 1px solid var(--border);
+        padding-top: 16px;
+      }
+
+      .digest-search {
+        border-top: 1px solid var(--border);
+        margin-top: 18px;
+        padding-top: 18px;
+      }
+
+      .digest-search label {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .search-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .search-row input {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        flex: 1 1 220px;
+        font: inherit;
+        padding: 10px 12px;
+      }
+
+      .search-row input:focus-visible {
+        outline: 3px solid var(--text);
+        outline-offset: 3px;
+      }
+
+      .search-suggestions {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        display: grid;
+        gap: 4px;
+        margin-top: 8px;
+        padding: 8px;
+      }
+
+      .search-suggestions[hidden],
+      .clear-search[hidden] {
+        display: none;
+      }
+
+      .suggestion-button {
+        appearance: none;
+        border: 0;
+        border-radius: 4px;
+        background: var(--background);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        padding: 8px;
+        text-align: left;
+      }
+
+      .suggestion-button:hover,
+      .suggestion-button:focus-visible {
+        background: var(--soft);
+        outline: 2px solid var(--text);
+        outline-offset: 2px;
+      }
+
+      .search-results-message {
+        color: var(--muted);
+        margin: 10px 0 0;
+      }
+
+      .quality-stars {
+        color: var(--text);
+        font-size: 1.25rem;
+        letter-spacing: 1px;
+      }
+
+      .quality-label {
+        color: var(--text);
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 2px 0 6px;
+      }
+
+      .digest-analytics {
+        border-bottom: 1px solid var(--border);
+        display: grid;
+        gap: 14px;
+        margin-bottom: 24px;
+        padding-bottom: 22px;
+      }
+
+      .digest-analytics[hidden] {
+        display: none;
+      }
+
+      .insights-title {
+        font-size: 1.45rem;
+        margin: 0;
+      }
+
+      .insights-grid {
+        align-items: stretch;
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .analytics-card {
+        background: var(--background);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        padding: 18px;
+      }
+
+      .analytics-card h3 {
+        font-size: 1.05rem;
+        margin: 0 0 12px;
+      }
+
+      .coverage-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .coverage-row {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: minmax(0, 1fr) 48px;
+        align-items: center;
+      }
+
+      .coverage-row .progress-track {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+
+      .coverage-topic {
+        font-weight: 700;
+        min-width: 0;
+      }
+
+      .progress-track {
+        background: var(--soft);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        height: 12px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        background: var(--text);
+        border-radius: inherit;
+        display: block;
+        height: 100%;
+        min-width: 3px;
+      }
+
+      .coverage-percent {
+        color: var(--muted);
+        font-size: 0.92rem;
+        text-align: right;
+      }
+
+      .radar-summary {
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .reading-goal-copy {
+        color: var(--muted);
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 14px 0 0;
+        text-transform: uppercase;
+      }
+
+      .goal-track {
+        height: 20px;
+        margin-top: auto;
+      }
+
+      .goal-complete {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .digest {
+        display: grid;
+        gap: 28px;
+      }
+
+      .article-group {
+        scroll-margin-top: 24px;
+      }
+
+      .article-group h3 {
+        border-bottom: 1px solid var(--border);
+        font-size: 1.6rem;
+        margin: 0 0 14px;
+        padding-bottom: 8px;
+      }
+
+      .article-list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .article-card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 18px;
+        transition: box-shadow 160ms ease, transform 160ms ease;
+      }
+
+      .article-card:hover {
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
+        transform: translateY(-2px);
+      }
+
+      .article-card-header {
+        align-items: start;
+        display: grid;
+        gap: 12px;
+        grid-template-columns: auto 1fr;
+      }
+
+      .article-topic-icon {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        display: grid;
+        font-size: 1.15rem;
+        height: 42px;
+        place-items: center;
+        width: 42px;
+      }
+
+      .article-card h2 {
+        margin: 0 0 6px;
+        font-size: 1.25rem;
+        line-height: 1.2;
+      }
+
+      .source {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .article-timing {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin: 0;
+      }
+
+      .summary {
+        margin: 0;
+      }
+
+      .meta {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+      }
+
+      .meta dt {
+        font-weight: 700;
+      }
+
+      .meta dd {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .tag {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 3px 8px;
+        color: var(--text);
+        font-size: 0.85rem;
+      }
+
+      .article-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .article-preview {
+        border: 2px solid var(--text);
+        border-radius: 8px;
+        margin: 0 0 24px;
+        padding: 18px;
+      }
+
+      .article-preview[hidden] {
+        display: none;
+      }
+
+      .preview-header {
+        align-items: start;
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+      }
+
+      .mock-note {
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .read-later-layout,
+      .history-layout,
+      .settings-layout {
+        padding-top: 28px;
+      }
+
+      .read-later-layout[hidden],
+      .history-layout[hidden],
+      .settings-layout[hidden] {
+        display: none;
+      }
+
+      .read-later-header,
+      .history-header,
+      .settings-header {
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 20px;
+        padding-bottom: 18px;
+      }
+
+      .read-later-header h2,
+      .history-header h2,
+      .settings-header h2 {
+        font-size: clamp(2rem, 6vw, 3.5rem);
+        line-height: 1;
+        margin: 0 0 8px;
+      }
+
+      .settings-card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 18px;
+      }
+
+      .settings-panel-overlay {
+        background: rgba(0, 0, 0, 0.35);
+        inset: 0;
+        position: fixed;
+        z-index: 20;
+      }
+
+      .settings-panel-overlay[hidden] {
+        display: none;
+      }
+
+      .settings-panel {
+        background: var(--background);
+        border-left: 1px solid var(--text);
+        box-shadow: -12px 0 30px rgba(0, 0, 0, 0.18);
+        height: 100%;
+        margin-left: auto;
+        max-width: min(420px, 100%);
+        overflow-y: auto;
+        padding: 22px;
+      }
+
+      .settings-panel-header {
+        align-items: start;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+      }
+
+      .settings-panel-header h2 {
+        margin: 0 0 4px;
+      }
+
+      .settings-save-message {
+        color: var(--text);
+        font-weight: 700;
+        margin: 0 0 14px;
+        min-height: 24px;
+      }
+
+      .settings-save-message[hidden] {
+        display: none;
+      }
+
+      .settings-close {
+        appearance: none;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--background);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        height: 36px;
+        line-height: 1;
+        width: 36px;
+      }
+
+      .settings-card h3 {
+        margin: 0 0 14px;
+      }
+
+      .settings-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .setting-toggle {
+        align-items: start;
+        border-top: 1px solid var(--border);
+        cursor: pointer;
+        display: grid;
+        gap: 12px;
+        grid-template-columns: auto 1fr;
+        padding-top: 12px;
+      }
+
+      .setting-toggle:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .setting-toggle input {
+        margin-top: 5px;
+      }
+
+      .toggle-text {
+        border-radius: 6px;
+        display: grid;
+        gap: 3px;
+      }
+
+      .toggle-text strong {
+        display: block;
+      }
+
+      .toggle-text span {
+        color: var(--muted);
+      }
+
+      .read-later-list,
+      .history-list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .history-detail-list {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .history-detail-list li {
+        margin-bottom: 6px;
+      }
+
+      @media (max-width: 760px) {
+        .insights-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 560px) {
+        main {
+          width: min(100% - 24px, 920px);
+          padding: 32px 0;
+        }
+
+        .chip {
+          flex: 1 1 calc(50% - 10px);
+        }
+
+        .topic-control {
+          flex: 1 1 calc(50% - 10px);
+        }
+
+        .topic-control .chip {
+          flex: 1 1 auto;
+        }
+
+        .generate {
+          max-width: none;
+        }
+
+        .digest-layout {
+          grid-template-columns: 1fr;
+          gap: 18px;
+          padding-top: 0;
+        }
+
+        .digest-sidebar {
+          background: var(--background);
+          border-bottom: 1px solid var(--border);
+          border-right: 0;
+          padding: 0 0 14px;
+          position: sticky;
+          top: 0;
+          z-index: 2;
+        }
+
+        .topic-nav {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 16px;
+          max-width: 100%;
+          min-width: 0;
+          overflow-x: auto;
+          padding-bottom: 4px;
+        }
+
+        .topic-link {
+          flex: 0 0 auto;
+          min-width: 140px;
+        }
+
+        .brief-stats {
+          grid-template-columns: 1fr;
+        }
+
+        .preview-header {
+          display: grid;
+        }
+
+        .digest-settings-button {
+          position: static;
+          margin-bottom: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Daily Radar</h1>
+        <p class="intro">Choose your interests and preview a personalised daily digest.</p>
+      </header>
+
+      <section class="controls" aria-labelledby="interests-heading">
+        <span class="section-label" id="interests-heading">Choose your interests</span>
+        <div class="chips" id="interestChips"></div>
+        <button class="generate" id="generateButton" type="button">Generate Digest</button>
+        <p class="message" id="message" role="status" aria-live="polite"></p>
+        <div class="preferences-bar">
+          <p class="welcome-message" id="welcomeMessage" hidden>☀️ Welcome back! Your interests have been loaded.</p>
+          <div class="article-actions">
+            <button class="secondary-action" id="readLaterButton" type="button">Read Later</button>
+            <button class="secondary-action" id="historyButton" type="button">Digest History</button>
+            <button class="secondary-action" id="settingsButton" type="button">Settings</button>
+            <button class="reset-preferences" id="resetPreferencesButton" type="button">Reset Preferences</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="priority-topics" id="priorityTopics" hidden>
+        <span class="section-label">Priority Topics</span>
+        <div class="priority-list" id="priorityList"></div>
+      </section>
+
+      <section class="loading-panel" id="digestLoadingPanel" aria-live="polite" aria-busy="true" hidden>
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <h2>Building your Daily Radar...</h2>
+        <div class="loading-steps">
+          <p>Scanning your RSS feeds...</p>
+          <p>Finding articles that match your interests...</p>
+          <p>Building your Daily Radar...</p>
+        </div>
+      </section>
+
+      <section class="digest-layout" id="digestLayout" hidden>
+        <aside class="digest-sidebar" aria-label="Selected digest topics">
+          <div class="sidebar-actions">
+            <button class="back-button" id="backButton" type="button">Back to Interests</button>
+            <button class="secondary-action" id="sidebarReadLaterButton" type="button">Read Later</button>
+            <button class="secondary-action" id="sidebarHistoryButton" type="button">Digest History</button>
+          </div>
+          <span class="section-label">Selected Topics</span>
+          <nav class="topic-nav" id="topicNav" aria-label="Digest sections"></nav>
+          <div class="sidebar-priorities" id="sidebarPriorities" hidden>
+            <span class="section-label">Priority Topics</span>
+            <div class="priority-list" id="sidebarPriorityList"></div>
+          </div>
+        </aside>
+        <div>
+          <section class="article-preview" id="articlePreview" aria-live="polite" hidden></section>
+          <div class="digest-heading">
+            <button
+              class="digest-settings-button"
+              id="digestSettingsButton"
+              type="button"
+              aria-haspopup="dialog"
+              aria-controls="settingsPanelOverlay"
+              aria-expanded="false"
+              aria-label="Open settings"
+            >
+              ⚙
+            </button>
+            <div class="morning-kicker">☀️ Good Morning</div>
+            <div class="brief-date" id="briefDate"></div>
+            <h2>Today's Brief</h2>
+            <div class="brief-stats" aria-label="Digest stats">
+              <div class="brief-stat">
+                <strong id="articlesAnalysed">0</strong>
+                <span>articles analysed</span>
+              </div>
+              <div class="brief-stat">
+                <strong id="articlesSelected">0</strong>
+                <span>selected</span>
+              </div>
+              <div class="brief-stat">
+                <strong id="readingTime">0 min</strong>
+                <span>estimated reading time</span>
+              </div>
+            </div>
+            <div class="brief-priorities" id="briefPriorities" hidden>
+              <span class="section-label">Priority Topics</span>
+              <div class="priority-list" id="briefPriorityList"></div>
+            </div>
+            <div class="brief-quality">
+              <div class="quality-stars" id="qualityStars">☆☆☆☆☆</div>
+              <div class="quality-label" id="qualityLabel">Limited Matches</div>
+              <p id="qualitySentence">Your digest has a small number of matches today.</p>
+            </div>
+            <p id="digestSummary">Generated from your selected topics.</p>
+            <p class="message" id="feedStatusMessage"></p>
+            <form class="digest-search" id="digestSearchForm" role="search">
+              <label for="digestSearchInput">Search this digest</label>
+              <div class="search-row">
+                <input
+                  id="digestSearchInput"
+                  type="search"
+                  autocomplete="off"
+                  aria-controls="searchSuggestions"
+                  aria-describedby="searchResultsMessage"
+                  placeholder="Search by title, source, topic, or reason"
+                />
+                <button class="secondary-action" type="submit">Search</button>
+                <button class="secondary-action clear-search" id="clearSearchButton" type="button" hidden>Clear Search</button>
+              </div>
+              <div class="search-suggestions" id="searchSuggestions" role="listbox" aria-label="Search suggestions" hidden></div>
+              <p class="search-results-message" id="searchResultsMessage" aria-live="polite"></p>
+            </form>
+          </div>
+          <section class="digest-analytics" id="digestAnalytics" aria-label="Digest insights" hidden>
+            <h3 class="insights-title">Insights</h3>
+            <div class="insights-grid">
+              <div class="analytics-card">
+                <h3>📊 Today's Coverage</h3>
+                <div class="coverage-list" id="coverageList"></div>
+              </div>
+              <div class="analytics-card">
+                <h3>📡 Radar Summary</h3>
+                <p class="radar-summary" id="radarSummary"></p>
+              </div>
+              <div class="analytics-card">
+                <h3>🎯 Reading Goal</h3>
+                <div class="progress-track goal-track" aria-hidden="true">
+                  <span class="progress-fill" id="readingGoalFill" style="width: 0%"></span>
+                </div>
+                <p class="reading-goal-copy" id="readingGoalText">0 / 3 Articles Read</p>
+              </div>
+            </div>
+          </section>
+          <section class="digest" id="digest" aria-label="Digest preview"></section>
+        </div>
+      </section>
+
+      <section class="read-later-layout" id="readLaterLayout" hidden>
+        <div class="read-later-header">
+          <button class="back-button" id="readLaterBackButton" type="button">Back to Interests</button>
+          <h2>Read Later</h2>
+          <p class="intro">Saved RSS articles from your generated digests.</p>
+        </div>
+        <section class="article-preview" id="readLaterPreview" aria-live="polite" hidden></section>
+        <div class="read-later-list" id="readLaterList"></div>
+      </section>
+
+      <section class="history-layout" id="historyLayout" hidden>
+        <div class="history-header">
+          <button class="back-button" id="historyBackButton" type="button">Back to Interests</button>
+          <h2>Digest History</h2>
+          <p class="intro">Local preview history only. Nothing is sent or synced.</p>
+        </div>
+        <section class="article-preview" id="historyDetail" aria-live="polite" hidden></section>
+        <div class="history-list" id="historyList"></div>
+      </section>
+
+      <section class="settings-layout" id="settingsLayout" hidden>
+        <div class="settings-header">
+          <button class="back-button" id="settingsBackButton" type="button">Back to Interests</button>
+          <h2>Settings</h2>
+          <p class="intro">Accessibility options are saved in this browser only.</p>
+        </div>
+        <div id="settingsCardHome">
+        <section class="settings-card" aria-labelledby="accessibility-heading">
+          <h3 id="accessibility-heading">Accessibility</h3>
+          <p class="settings-save-message" id="settingsSaveMessage" role="status" aria-live="polite" hidden></p>
+          <div class="settings-list">
+            <label class="setting-toggle" for="largerTextToggle">
+              <input id="largerTextToggle" type="checkbox" data-accessibility-setting="largerText" />
+              <span class="toggle-text">
+                <strong>Larger Text</strong>
+                <span>Increases headings, article titles, and body text.</span>
+              </span>
+            </label>
+            <label class="setting-toggle" for="dyslexiaFontToggle">
+              <input id="dyslexiaFontToggle" type="checkbox" data-accessibility-setting="dyslexiaFont" />
+              <span class="toggle-text">
+                <strong>Dyslexia-Friendly Font</strong>
+                <span>Uses a highly readable font across Daily Radar.</span>
+              </span>
+            </label>
+            <label class="setting-toggle" for="highContrastToggle">
+              <input id="highContrastToggle" type="checkbox" data-accessibility-setting="highContrast" />
+              <span class="toggle-text">
+                <strong>High Contrast Mode</strong>
+                <span>Strengthens borders and supporting text while keeping the black-and-white style.</span>
+              </span>
+            </label>
+            <label class="setting-toggle" for="reducedMotionToggle">
+              <input id="reducedMotionToggle" type="checkbox" data-accessibility-setting="reducedMotion" />
+              <span class="toggle-text">
+                <strong>Reduce Animations</strong>
+                <span>Turns off non-essential transitions and hover movement.</span>
+              </span>
+            </label>
+            <label class="setting-toggle" for="comfortableSpacingToggle">
+              <input id="comfortableSpacingToggle" type="checkbox" data-accessibility-setting="comfortableSpacing" />
+              <span class="toggle-text">
+                <strong>Comfortable Spacing</strong>
+                <span>Adds more space around cards, buttons, and text.</span>
+              </span>
+            </label>
+            <label class="setting-toggle" for="underlineLinksToggle">
+              <input id="underlineLinksToggle" type="checkbox" data-accessibility-setting="underlineLinks" />
+              <span class="toggle-text">
+                <strong>Underline Links</strong>
+                <span>Makes links easier to identify at a glance.</span>
+              </span>
+            </label>
+          </div>
+        </section>
+        </div>
+      </section>
+
+      <div
+        class="settings-panel-overlay"
+        id="settingsPanelOverlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-panel-heading"
+        hidden
+      >
+        <aside class="settings-panel">
+          <div class="settings-panel-header">
+            <div>
+              <h2 id="settings-panel-heading">Settings</h2>
+              <p class="intro">Changes save immediately.</p>
+            </div>
+            <button class="settings-close" id="settingsPanelClose" type="button" aria-label="Close settings">X</button>
+          </div>
+          <div id="settingsPanelContent"></div>
+        </aside>
+      </div>
+    </main>
+
+    <script>
+      const interests = [
+        "AI",
+        "Technology",
+        "Business",
+        "Sport",
+        "Music",
+        "Entertainment",
+        "Science",
+        "Gaming",
+        "Books",
+        "World News",
+      ];
+
+      const sportSubInterests = [
+        "Football",
+        "Formula 1",
+        "Netball",
+        "NFL",
+        "Tennis",
+        "Volleyball",
+        "Other Sport",
+      ];
+
+      const musicSubInterests = [
+        "Pop",
+        "Rock",
+        "Rap",
+        "R&B",
+        "Indie",
+        "Electronic",
+        "Classical",
+        "Musical Theatre",
+        "Other Music",
+      ];
+
+      const entertainmentSubInterests = [
+        "Movies",
+        "TV Shows",
+        "Theatre",
+        "Celebrities",
+        "Awards",
+        "Streaming",
+        "Other Entertainment",
+      ];
+
+      const booksSubInterests = [
+        "Fantasy",
+        "Romance",
+        "Mystery",
+        "Thriller",
+        "Sci-Fi",
+        "Young Adult",
+        "Literary Fiction",
+        "Non-Fiction",
+        "Other Books",
+      ];
+
+      const rssFeeds = [
+        {
+          name: "BBC Technology",
+          url: "https://feeds.bbci.co.uk/news/technology/rss.xml",
+          interests: ["Technology"],
+        },
+        {
+          name: "VentureBeat AI",
+          url: "https://venturebeat.com/category/ai/feed/",
+          interests: ["AI", "Technology", "Business"],
+        },
+        {
+          name: "BBC Sport",
+          url: "https://feeds.bbci.co.uk/sport/rss.xml",
+          interests: ["Sport"],
+        },
+        {
+          name: "Rolling Stone Music",
+          url: "https://www.rollingstone.com/music/music-news/feed/",
+          interests: ["Music", "Entertainment"],
+        },
+        {
+          name: "Variety Entertainment",
+          url: "https://variety.com/feed/",
+          interests: ["Entertainment", "Business"],
+        },
+        {
+          name: "New York Times Books",
+          url: "https://rss.nytimes.com/services/xml/rss/nyt/Books.xml",
+          interests: ["Books", "Entertainment"],
+        },
+        {
+          name: "ScienceDaily",
+          url: "https://www.sciencedaily.com/rss/top/science.xml",
+          interests: ["Science", "Technology"],
+        },
+        {
+          name: "Polygon Gaming",
+          url: "https://www.polygon.com/rss/index.xml",
+          interests: ["Gaming", "Technology", "Entertainment"],
+        },
+      ];
+
+      const subInterestRules = {
+        sportInterests: {
+          Football: ["football", "soccer", "premier league", "champions league", "fifa", "uefa"],
+          "Formula 1": ["formula 1", "f1", "grand prix", "motorsport", "racing"],
+          Netball: ["netball"],
+          NFL: ["nfl", "super bowl", "american football"],
+          Tennis: ["tennis", "wimbledon", "atp", "wta", "grand slam"],
+          Volleyball: ["volleyball"],
+          "Other Sport": ["sport", "athlete", "match", "tournament", "league", "coach"],
+        },
+        musicInterests: {
+          Pop: ["pop", "chart", "single"],
+          Rock: ["rock", "guitar", "band"],
+          Rap: ["rap", "hip-hop", "hip hop", "rapper"],
+          "R&B": ["r&b", "rnb", "soul"],
+          Indie: ["indie", "alternative"],
+          Electronic: ["electronic", "dance", "edm", "dj"],
+          Classical: ["classical", "orchestra", "symphony", "opera"],
+          "Musical Theatre": ["musical", "broadway", "west end", "theatre"],
+          "Other Music": ["music", "album", "song", "artist", "concert"],
+        },
+        entertainmentInterests: {
+          Movies: ["movie", "film", "box office", "cinema"],
+          "TV Shows": ["tv", "television", "series", "episode"],
+          Theatre: ["theatre", "theater", "stage", "play"],
+          Celebrities: ["celebrity", "star", "actor", "actress"],
+          Awards: ["awards", "oscar", "emmy", "grammy", "bafta"],
+          Streaming: ["streaming", "netflix", "disney+", "prime video", "hulu"],
+          "Other Entertainment": ["entertainment", "culture", "show"],
+        },
+        booksInterests: {
+          Fantasy: ["fantasy", "magic", "dragon"],
+          Romance: ["romance", "love story"],
+          Mystery: ["mystery", "detective", "crime"],
+          Thriller: ["thriller", "suspense"],
+          "Sci-Fi": ["sci-fi", "science fiction", "space"],
+          "Young Adult": ["young adult", "ya"],
+          "Literary Fiction": ["literary", "novel", "fiction"],
+          "Non-Fiction": ["non-fiction", "nonfiction", "memoir", "history", "biography"],
+          "Other Books": ["book", "author", "publisher", "reading"],
+        },
+      };
+
+      const mainInterestRules = {
+        AI: ["ai", "artificial intelligence", "machine learning", "chatbot", "openai", "model"],
+        Technology: ["technology", "tech", "software", "hardware", "app", "cyber", "device", "computer", "platform"],
+        Business: ["business", "market", "company", "startup", "revenue", "economy", "finance", "stock"],
+        Sport: ["sport", "football", "soccer", "formula 1", "f1", "tennis", "netball", "nfl", "volleyball", "athlete"],
+        Music: ["music", "album", "song", "artist", "concert", "band", "single", "tour"],
+        Entertainment: ["entertainment", "movie", "film", "tv", "streaming", "celebrity", "theatre", "awards"],
+        Science: ["science", "research", "study", "scientist", "space", "climate", "biology", "physics"],
+        Gaming: ["gaming", "game", "console", "playstation", "xbox", "nintendo", "studio"],
+        Books: ["book", "author", "novel", "fiction", "publisher", "reading", "literary"],
+        "World News": ["world", "global", "international", "government", "policy", "election", "conflict"],
+      };
+
+      const feedProxyBase = "https://api.allorigins.win/raw?url=";
+      let mockArticles = [];
+      let rssArticles = [];
+      let articlesLoaded = false;
+      let articlesLoadingPromise = null;
+      let failedFeeds = [];
+      let usingFallbackArticles = false;
+      let feedDebug = {
+        attempted: rssFeeds.length,
+        loaded: 0,
+        articlesFound: 0,
+        matched: 0,
+      };
+
+      const fallbackMockArticles = [
+        {
+          title: "Fallback: Technology Teams Track Safer Product Launches",
+          source: "Daily Radar Fallback Mock",
+          summary: "Mock fallback story used only when RSS feeds cannot provide enough matching articles.",
+          interests: ["Technology", "Business"],
+          sportInterests: [],
+          musicInterests: [],
+          entertainmentInterests: [],
+          booksInterests: [],
+          publishedAgo: "Fallback preview",
+          readingMinutes: 3,
+          isFallback: true,
+          reason: "Fallback mock data for Technology and Business while RSS sources are unavailable.",
+        },
+        {
+          title: "Fallback: AI Tools Help Readers Sort Daily Updates",
+          source: "Daily Radar Fallback Mock",
+          summary: "Mock fallback story used only when RSS feeds cannot provide enough matching articles.",
+          interests: ["AI", "Technology"],
+          sportInterests: [],
+          musicInterests: [],
+          entertainmentInterests: [],
+          booksInterests: [],
+          publishedAgo: "Fallback preview",
+          readingMinutes: 3,
+          isFallback: true,
+          reason: "Fallback mock data for AI and Technology while RSS sources are unavailable.",
+        },
+        {
+          title: "Fallback: Football Clubs Test Clearer Match Briefings",
+          source: "Daily Radar Fallback Mock",
+          summary: "Mock fallback story used only when RSS feeds cannot provide enough matching articles.",
+          interests: ["Sport"],
+          sportInterests: ["Football", "Other Sport"],
+          musicInterests: [],
+          entertainmentInterests: [],
+          booksInterests: [],
+          publishedAgo: "Fallback preview",
+          readingMinutes: 4,
+          isFallback: true,
+          reason: "Fallback mock data for Sport while RSS sources are unavailable.",
+        },
+        {
+          title: "Fallback: Formula 1 Teams Compare Race Weekend Data",
+          source: "Daily Radar Fallback Mock",
+          summary: "Mock fallback story used only when RSS feeds cannot provide enough matching articles.",
+          interests: ["Sport", "Technology"],
+          sportInterests: ["Formula 1"],
+          musicInterests: [],
+          entertainmentInterests: [],
+          booksInterests: [],
+          publishedAgo: "Fallback preview",
+          readingMinutes: 4,
+          isFallback: true,
+          reason: "Fallback mock data for Formula 1 while RSS sources are unavailable.",
+        },
+        {
+          title: "Fallback: Music Releases Arrive With Shorter Fan Guides",
+          source: "Daily Radar Fallback Mock",
+          summary: "Mock fallback story used only when RSS feeds cannot provide enough matching articles.",
+          interests: ["Music", "Entertainment"],
+          sportInterests: [],
+          musicInterests: ["Pop", "Rock", "Other Music"],
+          entertainmentInterests: ["Other Entertainment"],
+          booksInterests: [],
+          publishedAgo: "Fallback preview",
+          readingMinutes: 3,
+          isFallback: true,
+          reason: "Fallback mock data for Music while RSS sources are unavailable.",
+        },
+        {
+          title: "Fallback: Streaming Viewers Get Easier Catch-Up Guides",
+          source: "Daily Radar Fallback Mock",
+          summary: "Mock fallback story used only when RSS feeds cannot provide enough matching articles.",
+          interests: ["Entertainment"],
+          sportInterests: [],
+          musicInterests: [],
+          entertainmentInterests: ["Streaming", "TV Shows", "Other Entertainment"],
+          booksInterests: [],
+          publishedAgo: "Fallback preview",
+          readingMinutes: 3,
+          isFallback: true,
+          reason: "Fallback mock data for Entertainment while RSS sources are unavailable.",
+        },
+        {
+          title: "Fallback: Book Clubs Share Shorter Reading Lists",
+          source: "Daily Radar Fallback Mock",
+          summary: "Mock fallback story used only when RSS feeds cannot provide enough matching articles.",
+          interests: ["Books", "Entertainment"],
+          sportInterests: [],
+          musicInterests: [],
+          entertainmentInterests: [],
+          booksInterests: ["Fantasy", "Mystery", "Non-Fiction", "Other Books"],
+          publishedAgo: "Fallback preview",
+          readingMinutes: 4,
+          isFallback: true,
+          reason: "Fallback mock data for Books while RSS sources are unavailable.",
+        },
+        {
+          title: "Fallback: Science Teams Explain New Research in Plain Language",
+          source: "Daily Radar Fallback Mock",
+          summary: "Mock fallback story used only when RSS feeds cannot provide enough matching articles.",
+          interests: ["Science", "Technology"],
+          sportInterests: [],
+          musicInterests: [],
+          entertainmentInterests: [],
+          booksInterests: ["Non-Fiction"],
+          publishedAgo: "Fallback preview",
+          readingMinutes: 4,
+          isFallback: true,
+          reason: "Fallback mock data for Science while RSS sources are unavailable.",
+        },
+        {
+          title: "Fallback: Game Studios Refine Updates for Busy Players",
+          source: "Daily Radar Fallback Mock",
+          summary: "Mock fallback story used only when RSS feeds cannot provide enough matching articles.",
+          interests: ["Gaming", "Technology", "Entertainment"],
+          sportInterests: [],
+          musicInterests: [],
+          entertainmentInterests: ["Other Entertainment"],
+          booksInterests: [],
+          publishedAgo: "Fallback preview",
+          readingMinutes: 3,
+          isFallback: true,
+          reason: "Fallback mock data for Gaming while RSS sources are unavailable.",
+        },
+        {
+          title: "Fallback: World News Brief Tracks Global Policy Talks",
+          source: "Daily Radar Fallback Mock",
+          summary: "Mock fallback story used only when RSS feeds cannot provide enough matching articles.",
+          interests: ["World News", "Business"],
+          sportInterests: [],
+          musicInterests: [],
+          entertainmentInterests: [],
+          booksInterests: [],
+          publishedAgo: "Fallback preview",
+          readingMinutes: 4,
+          isFallback: true,
+          reason: "Fallback mock data for World News while RSS sources are unavailable.",
+        },
+      ];
+
+      const selectedInterests = new Set();
+      const selectedSportSubInterests = new Set();
+      const selectedMusicSubInterests = new Set();
+      const selectedEntertainmentSubInterests = new Set();
+      const selectedBooksSubInterests = new Set();
+      const selectedPriorityTopics = new Set();
+      const chipsContainer = document.querySelector("#interestChips");
+      const digest = document.querySelector("#digest");
+      const message = document.querySelector("#message");
+      const generateButton = document.querySelector("#generateButton");
+      const digestLoadingPanel = document.querySelector("#digestLoadingPanel");
+      const welcomeMessage = document.querySelector("#welcomeMessage");
+      const readLaterButton = document.querySelector("#readLaterButton");
+      const historyButton = document.querySelector("#historyButton");
+      const settingsButton = document.querySelector("#settingsButton");
+      const resetPreferencesButton = document.querySelector("#resetPreferencesButton");
+      const priorityTopics = document.querySelector("#priorityTopics");
+      const priorityList = document.querySelector("#priorityList");
+      const digestLayout = document.querySelector("#digestLayout");
+      const digestSettingsButton = document.querySelector("#digestSettingsButton");
+      const topicNav = document.querySelector("#topicNav");
+      const backButton = document.querySelector("#backButton");
+      const sidebarReadLaterButton = document.querySelector("#sidebarReadLaterButton");
+      const sidebarHistoryButton = document.querySelector("#sidebarHistoryButton");
+      const articlePreview = document.querySelector("#articlePreview");
+      const readLaterLayout = document.querySelector("#readLaterLayout");
+      const readLaterBackButton = document.querySelector("#readLaterBackButton");
+      const readLaterPreview = document.querySelector("#readLaterPreview");
+      const readLaterList = document.querySelector("#readLaterList");
+      const historyLayout = document.querySelector("#historyLayout");
+      const historyBackButton = document.querySelector("#historyBackButton");
+      const historyDetail = document.querySelector("#historyDetail");
+      const historyList = document.querySelector("#historyList");
+      const settingsLayout = document.querySelector("#settingsLayout");
+      const settingsBackButton = document.querySelector("#settingsBackButton");
+      const settingsCardHome = document.querySelector("#settingsCardHome");
+      const settingsCard = document.querySelector(".settings-card");
+      const settingsPanelOverlay = document.querySelector("#settingsPanelOverlay");
+      const settingsPanelContent = document.querySelector("#settingsPanelContent");
+      const settingsPanelClose = document.querySelector("#settingsPanelClose");
+      const settingsSaveMessage = document.querySelector("#settingsSaveMessage");
+      const accessibilityToggles = document.querySelectorAll("[data-accessibility-setting]");
+      const sidebarPriorities = document.querySelector("#sidebarPriorities");
+      const sidebarPriorityList = document.querySelector("#sidebarPriorityList");
+      const digestSummary = document.querySelector("#digestSummary");
+      const feedStatusMessage = document.querySelector("#feedStatusMessage");
+      const digestSearchForm = document.querySelector("#digestSearchForm");
+      const digestSearchInput = document.querySelector("#digestSearchInput");
+      const searchSuggestions = document.querySelector("#searchSuggestions");
+      const searchResultsMessage = document.querySelector("#searchResultsMessage");
+      const clearSearchButton = document.querySelector("#clearSearchButton");
+      const briefDate = document.querySelector("#briefDate");
+      const articlesAnalysed = document.querySelector("#articlesAnalysed");
+      const articlesSelected = document.querySelector("#articlesSelected");
+      const readingTime = document.querySelector("#readingTime");
+      const briefPriorities = document.querySelector("#briefPriorities");
+      const briefPriorityList = document.querySelector("#briefPriorityList");
+      const qualityStars = document.querySelector("#qualityStars");
+      const qualityLabel = document.querySelector("#qualityLabel");
+      const qualitySentence = document.querySelector("#qualitySentence");
+      const digestAnalytics = document.querySelector("#digestAnalytics");
+      const coverageList = document.querySelector("#coverageList");
+      const radarSummary = document.querySelector("#radarSummary");
+      const readingGoalFill = document.querySelector("#readingGoalFill");
+      const readingGoalText = document.querySelector("#readingGoalText");
+      const sportSubSection = document.createElement("div");
+      const sportSubChips = document.createElement("div");
+      const musicSubSection = document.createElement("div");
+      const musicSubChips = document.createElement("div");
+      const entertainmentSubSection = document.createElement("div");
+      const entertainmentSubChips = document.createElement("div");
+      const booksSubSection = document.createElement("div");
+      const booksSubChips = document.createElement("div");
+
+      sportSubSection.className = "sub-interests";
+      sportSubSection.hidden = true;
+      sportSubSection.innerHTML = '<span class="sub-label">Choose specific sports</span>';
+      sportSubChips.className = "chips sub-chips";
+      sportSubSection.appendChild(sportSubChips);
+      chipsContainer.insertAdjacentElement("afterend", sportSubSection);
+
+      musicSubSection.className = "sub-interests";
+      musicSubSection.hidden = true;
+      musicSubSection.innerHTML = '<span class="sub-label">Choose music genres</span>';
+      musicSubChips.className = "chips sub-chips";
+      musicSubSection.appendChild(musicSubChips);
+      sportSubSection.insertAdjacentElement("afterend", musicSubSection);
+
+      entertainmentSubSection.className = "sub-interests";
+      entertainmentSubSection.hidden = true;
+      entertainmentSubSection.innerHTML = '<span class="sub-label">Choose entertainment types</span>';
+      entertainmentSubChips.className = "chips sub-chips";
+      entertainmentSubSection.appendChild(entertainmentSubChips);
+      musicSubSection.insertAdjacentElement("afterend", entertainmentSubSection);
+
+      booksSubSection.className = "sub-interests";
+      booksSubSection.hidden = true;
+      booksSubSection.innerHTML = '<span class="sub-label">Choose book genres</span>';
+      booksSubChips.className = "chips sub-chips";
+      booksSubSection.appendChild(booksSubChips);
+      entertainmentSubSection.insertAdjacentElement("afterend", booksSubSection);
+
+      const preferencesKey = "dailyRadarPreferences";
+      const accessibilityPreferencesKey = "dailyRadarAccessibilityPreferences";
+      const savedArticlesKey = "dailyRadarSavedArticles";
+      const digestHistoryKey = "dailyRadarDigestHistory";
+      const readingGoalKey = "dailyRadarReadingGoal";
+      const readingGoalTarget = 3;
+      const accessibilityClassNames = {
+        largerText: "accessibility-larger-text",
+        dyslexiaFont: "accessibility-dyslexia-font",
+        highContrast: "accessibility-high-contrast",
+        reducedMotion: "accessibility-reduced-motion",
+        comfortableSpacing: "accessibility-comfortable-spacing",
+        underlineLinks: "accessibility-underline-links",
+      };
+      let settingsSaveMessageTimer = null;
+      let currentDigestArticles = [];
+      let currentDigestGroups = [];
+      let currentSearchTerm = "";
+      let isRestoringPreferences = false;
+      const savedArticleIds = new Set(getSavedArticleIds());
+
+      function clearMessage() {
+        message.textContent = "";
+        message.classList.remove("error");
+      }
+
+      function showDigestLoading() {
+        digestLoadingPanel.hidden = false;
+        digestLoadingPanel.setAttribute("aria-busy", "true");
+        generateButton.disabled = true;
+        generateButton.textContent = "Generating...";
+      }
+
+      function hideDigestLoading() {
+        digestLoadingPanel.hidden = true;
+        digestLoadingPanel.setAttribute("aria-busy", "false");
+        generateButton.disabled = false;
+        generateButton.textContent = "Generate Digest";
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function stripHtml(value) {
+        const doc = new DOMParser().parseFromString(value || "", "text/html");
+        return doc.body.textContent.replace(/\s+/g, " ").trim();
+      }
+
+      function getTextContent(node, selectors) {
+        for (const selector of selectors) {
+          const match = node.querySelector(selector);
+
+          if (match?.textContent?.trim()) {
+            return match.textContent.trim();
+          }
+        }
+
+        return "";
+      }
+
+      function getArticleLink(item) {
+        const directLink = getTextContent(item, ["link"]);
+
+        if (directLink) {
+          return directLink;
+        }
+
+        const atomLink = item.querySelector("link[href]");
+        return atomLink?.getAttribute("href") || "";
+      }
+
+      function getRelativePublishedTime(dateValue) {
+        const publishedDate = new Date(dateValue);
+
+        if (Number.isNaN(publishedDate.getTime())) {
+          return "Publication time unavailable";
+        }
+
+        const differenceMinutes = Math.max(1, Math.round((Date.now() - publishedDate.getTime()) / 60000));
+
+        if (differenceMinutes < 60) {
+          return `${differenceMinutes} min ago`;
+        }
+
+        const differenceHours = Math.round(differenceMinutes / 60);
+
+        if (differenceHours < 24) {
+          return `${differenceHours} hour${differenceHours === 1 ? "" : "s"} ago`;
+        }
+
+        const differenceDays = Math.round(differenceHours / 24);
+        return `${differenceDays} day${differenceDays === 1 ? "" : "s"} ago`;
+      }
+
+      function estimateReadingMinutes(title, summary) {
+        const wordCount = `${title} ${summary}`.split(/\s+/).filter(Boolean).length;
+        return Math.max(1, Math.ceil(wordCount / 180));
+      }
+
+      function detectSubInterests(text, fieldName) {
+        const lowerText = text.toLowerCase();
+        const rules = subInterestRules[fieldName] || {};
+
+        return Object.entries(rules)
+          .filter(([, keywords]) => keywords.some((keyword) => lowerText.includes(keyword)))
+          .map(([topic]) => topic);
+      }
+
+      function textMatchesTopic(text, topic) {
+        const lowerText = text.toLowerCase();
+        const keywords = mainInterestRules[topic] || [];
+
+        return keywords.some((keyword) => lowerText.includes(keyword));
+      }
+
+      function getArticleText(article) {
+        return `${article.title || ""} ${article.summary || ""} ${article.categoryText || ""} ${article.source || ""}`;
+      }
+
+      function articleMatchesMainInterest(article, interest) {
+        if (article.isFallback) {
+          return (
+            article.interests.includes(interest) &&
+            (article.interests[0] === interest || textMatchesTopic(getArticleText(article), interest))
+          );
+        }
+
+        if (!article.interests.includes(interest)) {
+          return false;
+        }
+
+        return article.primaryInterest === interest || textMatchesTopic(getArticleText(article), interest);
+      }
+
+      function buildRssArticle(item, feed) {
+        const title = getTextContent(item, ["title"]);
+        const sourceUrl = getArticleLink(item);
+
+        if (!title || !sourceUrl) {
+          return null;
+        }
+
+        const rawSummary = getTextContent(item, ["description", "summary", "content"]);
+        const summary = stripHtml(rawSummary) || "No summary was provided by this RSS feed.";
+        const publishedAt = getTextContent(item, ["pubDate", "published", "updated"]);
+        const categoryText = [...item.querySelectorAll("category")].map((node) => node.textContent).join(" ");
+        const searchableText = `${title} ${summary} ${categoryText}`;
+        const interests = [...new Set(feed.interests)];
+        const sportInterests = detectSubInterests(searchableText, "sportInterests");
+        const musicInterests = detectSubInterests(searchableText, "musicInterests");
+        const entertainmentInterests = detectSubInterests(searchableText, "entertainmentInterests");
+        const booksInterests = detectSubInterests(searchableText, "booksInterests");
+        const matchedMainInterests = interests.filter(
+          (interest, index) => index === 0 || textMatchesTopic(searchableText, interest)
+        );
+        const matchedTopics = [
+          ...matchedMainInterests,
+          ...sportInterests,
+          ...musicInterests,
+          ...entertainmentInterests,
+          ...booksInterests,
+        ];
+
+        return {
+          title,
+          source: feed.name,
+          summary,
+          interests,
+          primaryInterest: interests[0],
+          categoryText,
+          sportInterests,
+          musicInterests,
+          entertainmentInterests,
+          booksInterests,
+          sourceUrl,
+          publishedAt,
+          publishedAgo: getRelativePublishedTime(publishedAt),
+          readingMinutes: estimateReadingMinutes(title, summary),
+          reason: `This RSS article matched: ${[...new Set(matchedTopics)].join(", ")}.`,
+        };
+      }
+
+      async function fetchRssFeed(feed) {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 10000);
+        let response;
+
+        try {
+          response = await fetch(`${feedProxyBase}${encodeURIComponent(feed.url)}`, { signal: controller.signal });
+        } finally {
+          window.clearTimeout(timeout);
+        }
+
+        if (!response.ok) {
+          throw new Error(`Could not load ${feed.name}`);
+        }
+
+        const xmlText = await response.text();
+        const xmlDoc = new DOMParser().parseFromString(xmlText, "application/xml");
+
+        if (xmlDoc.querySelector("parsererror")) {
+          throw new Error(`Could not parse ${feed.name}`);
+        }
+
+        return [...xmlDoc.querySelectorAll("item, entry")]
+          .map((item) => buildRssArticle(item, feed))
+          .filter(Boolean);
+      }
+
+      async function loadRssArticles() {
+        if (articlesLoaded) {
+          return mockArticles;
+        }
+
+        if (articlesLoadingPromise) {
+          return articlesLoadingPromise;
+        }
+
+        articlesLoadingPromise = Promise.allSettled(rssFeeds.map(fetchRssFeed)).then((results) => {
+          const loadedFeeds = results.filter((result) => result.status === "fulfilled");
+          failedFeeds = results
+            .map((result, index) => (result.status === "rejected" ? rssFeeds[index].name : null))
+            .filter(Boolean);
+
+          const seenUrls = new Set();
+          rssArticles = results
+            .filter((result) => result.status === "fulfilled")
+            .flatMap((result) => result.value)
+            .filter((article) => {
+              if (seenUrls.has(article.sourceUrl)) {
+                return false;
+              }
+
+              seenUrls.add(article.sourceUrl);
+              return true;
+            });
+          mockArticles = rssArticles;
+
+          feedDebug = {
+            attempted: rssFeeds.length,
+            loaded: loadedFeeds.length,
+            articlesFound: mockArticles.length,
+            matched: 0,
+          };
+
+          if (mockArticles.length === 0) {
+            useFallbackArticles();
+          }
+
+          console.info("Daily Radar RSS debug", feedDebug);
+          articlesLoaded = true;
+          return mockArticles;
+        });
+
+        return articlesLoadingPromise;
+      }
+
+      function useFallbackArticles() {
+        usingFallbackArticles = true;
+        mockArticles = fallbackMockArticles;
+        feedDebug.articlesFound = mockArticles.length;
+      }
+
+      function renderFeedStatus() {
+        if (!feedStatusMessage) {
+          return;
+        }
+
+        const debugText = `Feeds attempted: ${feedDebug.attempted}. Feeds loaded: ${feedDebug.loaded}. Articles found: ${feedDebug.articlesFound}. Articles matched: ${feedDebug.matched}.`;
+        const failureText =
+          failedFeeds.length === 0
+            ? ""
+            : ` Some RSS sources could not be loaded: ${failedFeeds.join(", ")}.`;
+        const fallbackText = usingFallbackArticles
+          ? " Demo fallback articles are being shown because no real RSS articles were available."
+          : "";
+
+        feedStatusMessage.textContent = `${debugText}${failureText}${fallbackText}`;
+      }
+
+      function savePreferences() {
+        if (isRestoringPreferences) {
+          return;
+        }
+
+        const preferences = {
+          interests: [...selectedInterests],
+          sportSubInterests: [...selectedSportSubInterests],
+          musicSubInterests: [...selectedMusicSubInterests],
+          entertainmentSubInterests: [...selectedEntertainmentSubInterests],
+          booksSubInterests: [...selectedBooksSubInterests],
+          priorityTopics: [...selectedPriorityTopics],
+        };
+
+        localStorage.setItem(preferencesKey, JSON.stringify(preferences));
+      }
+
+      function getSavedPreferences() {
+        const savedPreferences = localStorage.getItem(preferencesKey);
+
+        if (!savedPreferences) {
+          return null;
+        }
+
+        try {
+          return JSON.parse(savedPreferences);
+        } catch {
+          localStorage.removeItem(preferencesKey);
+          return null;
+        }
+      }
+
+      function syncSavedSet(savedValues, selectedSet, selector, dataAttribute) {
+        if (!Array.isArray(savedValues)) {
+          return;
+        }
+
+        savedValues.forEach((topic) => {
+          const control = document.querySelector(`${selector}[data-${dataAttribute}="${CSS.escape(topic)}"]`)?.closest(".topic-control");
+
+          if (!control) {
+            return;
+          }
+
+          const chip = control.querySelector(".chip");
+          selectedSet.add(topic);
+          chip.setAttribute("aria-pressed", "true");
+          updateTopicControlState(control, true);
+        });
+      }
+
+      function restorePreferences() {
+        const preferences = getSavedPreferences();
+
+        if (!preferences) {
+          return;
+        }
+
+        isRestoringPreferences = true;
+        syncSavedSet(preferences.interests, selectedInterests, ".chip", "interest");
+        updateSportSubSection();
+        updateMusicSubSection();
+        updateEntertainmentSubSection();
+        updateBooksSubSection();
+        syncSavedSet(preferences.sportSubInterests, selectedSportSubInterests, ".chip", "sport-interest");
+        syncSavedSet(preferences.musicSubInterests, selectedMusicSubInterests, ".chip", "music-interest");
+        syncSavedSet(
+          preferences.entertainmentSubInterests,
+          selectedEntertainmentSubInterests,
+          ".chip",
+          "entertainment-interest"
+        );
+        syncSavedSet(preferences.booksSubInterests, selectedBooksSubInterests, ".chip", "books-interest");
+
+        if (Array.isArray(preferences.priorityTopics)) {
+          preferences.priorityTopics.forEach((topic) => selectedPriorityTopics.add(topic));
+        }
+
+        document.querySelectorAll(".topic-control").forEach((control) => {
+          const topic = control.dataset.topic;
+          const isSelected =
+            selectedInterests.has(topic) ||
+            selectedSportSubInterests.has(topic) ||
+            selectedMusicSubInterests.has(topic) ||
+            selectedEntertainmentSubInterests.has(topic) ||
+            selectedBooksSubInterests.has(topic);
+          updateTopicControlState(control, isSelected);
+        });
+
+        isRestoringPreferences = false;
+        welcomeMessage.hidden = false;
+      }
+
+      function clearAllSelections() {
+        selectedInterests.clear();
+        resetSportSubInterests();
+        resetMusicSubInterests();
+        resetEntertainmentSubInterests();
+        resetBooksSubInterests();
+        selectedPriorityTopics.clear();
+
+        document.querySelectorAll(".topic-control").forEach((control) => {
+          const chip = control.querySelector(".chip");
+          chip.setAttribute("aria-pressed", "false");
+          updateTopicControlState(control, false);
+        });
+
+        updateSportSubSection();
+        updateMusicSubSection();
+        updateEntertainmentSubSection();
+        updateBooksSubSection();
+      }
+
+      function resetPreferences() {
+        const confirmed = window.confirm("Reset all saved Daily Radar preferences?");
+
+        if (!confirmed) {
+          return;
+        }
+
+        localStorage.removeItem(preferencesKey);
+        showInterestEditor();
+        clearAllSelections();
+        welcomeMessage.hidden = true;
+        clearMessage();
+      }
+
+      function getAccessibilityPreferences() {
+        const savedPreferences = localStorage.getItem(accessibilityPreferencesKey);
+
+        if (!savedPreferences) {
+          return {};
+        }
+
+        try {
+          const parsedPreferences = JSON.parse(savedPreferences);
+          return parsedPreferences && typeof parsedPreferences === "object" ? parsedPreferences : {};
+        } catch {
+          localStorage.removeItem(accessibilityPreferencesKey);
+          return {};
+        }
+      }
+
+      function saveAccessibilityPreferences(preferences) {
+        localStorage.setItem(accessibilityPreferencesKey, JSON.stringify(preferences));
+      }
+
+      function showSettingsSavedMessage(messageText = "Settings saved") {
+        settingsSaveMessage.textContent = messageText;
+        settingsSaveMessage.hidden = false;
+
+        window.clearTimeout(settingsSaveMessageTimer);
+        settingsSaveMessageTimer = window.setTimeout(() => {
+          settingsSaveMessage.hidden = true;
+        }, 1800);
+      }
+
+      function applyAccessibilityPreferences(preferences) {
+        Object.entries(accessibilityClassNames).forEach(([setting, className]) => {
+          document.body.classList.toggle(className, Boolean(preferences[setting]));
+        });
+
+        accessibilityToggles.forEach((toggle) => {
+          toggle.checked = Boolean(preferences[toggle.dataset.accessibilitySetting]);
+        });
+      }
+
+      function restoreAccessibilityPreferences() {
+        applyAccessibilityPreferences(getAccessibilityPreferences());
+      }
+
+      function updateAccessibilityPreference(setting, isEnabled) {
+        const preferences = getAccessibilityPreferences();
+        preferences[setting] = isEnabled;
+        saveAccessibilityPreferences(preferences);
+        applyAccessibilityPreferences(preferences);
+        showSettingsSavedMessage("Accessibility preferences saved");
+      }
+
+      function getScrollBehavior() {
+        return document.body.classList.contains("accessibility-reduced-motion") ? "auto" : "smooth";
+      }
+
+      function getArticleId(article) {
+        return createSlug(article.sourceUrl || article.title);
+      }
+
+      function getSavedArticleIds() {
+        const savedArticles = localStorage.getItem(savedArticlesKey);
+
+        if (!savedArticles) {
+          return [];
+        }
+
+        try {
+          const parsedArticles = JSON.parse(savedArticles);
+          return Array.isArray(parsedArticles) ? parsedArticles : [];
+        } catch {
+          localStorage.removeItem(savedArticlesKey);
+          return [];
+        }
+      }
+
+      function saveSavedArticles() {
+        localStorage.setItem(savedArticlesKey, JSON.stringify([...savedArticleIds]));
+      }
+
+      function getArticleById(articleId) {
+        return mockArticles.find((article) => getArticleId(article) === articleId);
+      }
+
+      function getDisplayTitle(article) {
+        return article.isFallback ? article.title.replace(/^Fallback:\s*/i, "") : article.title;
+      }
+
+      function getDisplayMatches(article) {
+        const matches = article.matches || getArticleTopics(article);
+        return [...new Set(matches)];
+      }
+
+      function updateSaveButtons() {
+        document.querySelectorAll("[data-save-article]").forEach((button) => {
+          const articleId = button.dataset.saveArticle;
+          const isSaved = savedArticleIds.has(articleId);
+          button.textContent = isSaved ? "Saved" : "Save for Later";
+          button.disabled = isSaved;
+        });
+      }
+
+      function saveArticle(articleId) {
+        if (savedArticleIds.has(articleId)) {
+          updateSaveButtons();
+          return;
+        }
+
+        savedArticleIds.add(articleId);
+        saveSavedArticles();
+        updateSaveButtons();
+        renderReadLater();
+      }
+
+      function removeSavedArticle(articleId) {
+        savedArticleIds.delete(articleId);
+        saveSavedArticles();
+        updateSaveButtons();
+        renderReadLater();
+      }
+
+      function getSourceLinkMarkup(article) {
+        if (article.isFallback) {
+          return '<p class="mock-note">Fallback mock article. No live source link is available for this item.</p>';
+        }
+
+        if (!article.sourceUrl) {
+          return '<p class="mock-note">No source link was provided by this RSS item.</p>';
+        }
+
+        return `<p><a href="${escapeHtml(article.sourceUrl)}" target="_blank" rel="noopener noreferrer">Open original article</a></p>`;
+      }
+
+      function getTodayKey() {
+        return new Date().toISOString().slice(0, 10);
+      }
+
+      function getReadingGoalProgress() {
+        const savedGoal = localStorage.getItem(readingGoalKey);
+        const today = getTodayKey();
+
+        if (!savedGoal) {
+          return { date: today, readArticleIds: [] };
+        }
+
+        try {
+          const parsedGoal = JSON.parse(savedGoal);
+
+          if (parsedGoal.date !== today || !Array.isArray(parsedGoal.readArticleIds)) {
+            return { date: today, readArticleIds: [] };
+          }
+
+          return parsedGoal;
+        } catch {
+          localStorage.removeItem(readingGoalKey);
+          return { date: today, readArticleIds: [] };
+        }
+      }
+
+      function saveReadingGoalProgress(progress) {
+        localStorage.setItem(readingGoalKey, JSON.stringify(progress));
+      }
+
+      function renderReadingGoal() {
+        const progress = getReadingGoalProgress();
+        const readCount = Math.min(progress.readArticleIds.length, readingGoalTarget);
+        const percent = Math.min(100, Math.round((readCount / readingGoalTarget) * 100));
+
+        readingGoalFill.style.width = `${percent}%`;
+        readingGoalText.textContent =
+          readCount >= readingGoalTarget
+            ? `🎉 Goal completed! ${readCount} / ${readingGoalTarget} Articles Read`
+            : `${readCount} / ${readingGoalTarget} Articles Read`;
+        readingGoalText.classList.toggle("goal-complete", readCount >= readingGoalTarget);
+      }
+
+      function markArticleRead(articleId) {
+        const progress = getReadingGoalProgress();
+
+        if (!progress.readArticleIds.includes(articleId)) {
+          progress.readArticleIds.push(articleId);
+          saveReadingGoalProgress(progress);
+        }
+
+        renderReadingGoal();
+      }
+
+      function renderPreview(article, container) {
+        const tags = getDisplayMatches(article).map((interest) => `<span class="tag">${escapeHtml(interest)}</span>`).join("");
+
+        container.hidden = false;
+        container.innerHTML = `
+          <div class="preview-header">
+            <div>
+              <span class="section-label">Article Preview</span>
+              <h2>${escapeHtml(getDisplayTitle(article))}</h2>
+              <p class="source">${escapeHtml(article.source)}</p>
+            </div>
+            <button class="preview-close" type="button">Close Preview</button>
+          </div>
+          <p class="summary">${escapeHtml(article.summary)}</p>
+          <dl class="meta">
+            <dt>Matching interests</dt>
+            <dd><span class="tag-list">${tags}</span></dd>
+            <dt>Why this was included</dt>
+            <dd>${escapeHtml(article.reason)}</dd>
+          </dl>
+          ${getSourceLinkMarkup(article)}
+        `;
+
+        container.querySelector(".preview-close").addEventListener("click", () => {
+          container.hidden = true;
+          container.innerHTML = "";
+        });
+        container.scrollIntoView({ behavior: getScrollBehavior(), block: "start" });
+      }
+
+      function showArticlePreview(articleId, container = articlePreview) {
+        const article = getArticleById(articleId);
+
+        if (!article) {
+          return;
+        }
+
+        markArticleRead(articleId);
+        renderPreview(article, container);
+      }
+
+      async function showReadLater() {
+        closeDigestSettingsPanel();
+        document.body.classList.remove("digest-mode");
+        document.body.classList.remove("history-mode");
+        document.body.classList.remove("settings-mode");
+        document.body.classList.add("read-later-mode");
+        digestLayout.hidden = true;
+        readLaterLayout.hidden = false;
+        historyLayout.hidden = true;
+        settingsLayout.hidden = true;
+        historyDetail.hidden = true;
+        historyDetail.innerHTML = "";
+        readLaterPreview.hidden = true;
+        readLaterPreview.innerHTML = "";
+        readLaterList.innerHTML = "";
+        const loadingCard = document.createElement("article");
+        loadingCard.className = "article-card";
+        loadingCard.innerHTML = `
+          <h2>Loading saved RSS articles</h2>
+          <p class="summary">Daily Radar is checking the current RSS feeds.</p>
+        `;
+        readLaterList.appendChild(loadingCard);
+        await loadRssArticles();
+        renderReadLater();
+        window.scrollTo({ top: 0, behavior: getScrollBehavior() });
+      }
+
+      function renderReadLater() {
+        readLaterList.innerHTML = "";
+
+        const savedArticles = [...savedArticleIds].map(getArticleById).filter(Boolean);
+
+        if (savedArticles.length === 0) {
+          const emptyCard = document.createElement("article");
+          emptyCard.className = "article-card";
+          emptyCard.innerHTML = `
+            <h2>No saved articles yet</h2>
+            <p class="summary">Use Save for Later on a digest article to keep it here.</p>
+          `;
+          readLaterList.appendChild(emptyCard);
+          return;
+        }
+
+        savedArticles.forEach((article) => {
+          const articleId = getArticleId(article);
+          const card = renderArticleCard(article);
+          const removeButton = document.createElement("button");
+
+          removeButton.type = "button";
+          removeButton.className = "remove-saved";
+          removeButton.textContent = "Remove";
+          removeButton.addEventListener("click", () => removeSavedArticle(articleId));
+
+          card.querySelector(".article-actions").appendChild(removeButton);
+          readLaterList.appendChild(card);
+        });
+      }
+
+      function getDigestHistory() {
+        const savedHistory = localStorage.getItem(digestHistoryKey);
+
+        if (!savedHistory) {
+          return [];
+        }
+
+        try {
+          const parsedHistory = JSON.parse(savedHistory);
+          return Array.isArray(parsedHistory) ? parsedHistory : [];
+        } catch {
+          localStorage.removeItem(digestHistoryKey);
+          return [];
+        }
+      }
+
+      function saveDigestHistory(historyItems) {
+        localStorage.setItem(digestHistoryKey, JSON.stringify(historyItems));
+      }
+
+      function getSelectedHistoryTopics(record) {
+        const subInterests = record.subInterests || {};
+
+        return [
+          ...(record.selectedInterests || []),
+          ...(subInterests.sport || []),
+          ...(subInterests.music || []),
+          ...(subInterests.entertainment || []),
+          ...(subInterests.books || []),
+        ];
+      }
+
+      function saveDigestRecord(matchingArticles) {
+        const quality = getDigestQuality(matchingArticles);
+        const record = {
+          id: `digest-${Date.now()}`,
+          dateGenerated: new Date().toISOString(),
+          selectedInterests: [...selectedInterests],
+          subInterests: {
+            sport: [...selectedSportSubInterests],
+            music: [...selectedMusicSubInterests],
+            entertainment: [...selectedEntertainmentSubInterests],
+            books: [...selectedBooksSubInterests],
+          },
+          priorityTopics: [...selectedPriorityTopics],
+          articleTitles: matchingArticles.map((article) => getDisplayTitle(article)),
+          digestQuality: quality.label,
+        };
+        const historyItems = getDigestHistory();
+
+        historyItems.unshift(record);
+        saveDigestHistory(historyItems);
+        renderHistoryList();
+      }
+
+      function formatHistoryDate(dateValue) {
+        return new Intl.DateTimeFormat("en-GB", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(new Date(dateValue));
+      }
+
+      function renderHistoryTags(items) {
+        if (!items || items.length === 0) {
+          return '<span class="tag">None</span>';
+        }
+
+        return items.map((item) => `<span class="tag">${escapeHtml(item)}</span>`).join("");
+      }
+
+      function renderHistoryDetail(record) {
+        const selectedTopics = getSelectedHistoryTopics(record);
+        const articleTitles = record.articleTitles || [];
+        const articleItems =
+          articleTitles.length === 0
+            ? "<li>No RSS articles matched this digest.</li>"
+            : articleTitles.map((title) => `<li>${escapeHtml(title)}</li>`).join("");
+
+        historyDetail.hidden = false;
+        historyDetail.innerHTML = `
+          <div class="preview-header">
+            <div>
+              <span class="section-label">Past Digest Summary</span>
+              <h2>${escapeHtml(formatHistoryDate(record.dateGenerated))}</h2>
+              <p class="source">Local preview history only</p>
+            </div>
+            <button class="preview-close" type="button">Close Summary</button>
+          </div>
+          <dl class="meta">
+            <dt>Selected interests</dt>
+            <dd><span class="tag-list">${renderHistoryTags(selectedTopics)}</span></dd>
+            <dt>Priority topics</dt>
+            <dd><span class="tag-list">${renderHistoryTags(record.priorityTopics)}</span></dd>
+            <dt>Digest quality</dt>
+            <dd>${escapeHtml(record.digestQuality)}</dd>
+            <dt>Article titles included</dt>
+            <dd><ol class="history-detail-list">${articleItems}</ol></dd>
+          </dl>
+          <p class="mock-note">This summary is saved only in this browser for preview.</p>
+        `;
+
+        historyDetail.querySelector(".preview-close").addEventListener("click", () => {
+          historyDetail.hidden = true;
+          historyDetail.innerHTML = "";
+        });
+        historyDetail.scrollIntoView({ behavior: getScrollBehavior(), block: "start" });
+      }
+
+      function deleteHistoryItem(historyId) {
+        const updatedHistory = getDigestHistory().filter((record) => record.id !== historyId);
+
+        saveDigestHistory(updatedHistory);
+        historyDetail.hidden = true;
+        historyDetail.innerHTML = "";
+        renderHistoryList();
+      }
+
+      function renderHistoryList() {
+        historyList.innerHTML = "";
+
+        const historyItems = getDigestHistory();
+
+        if (historyItems.length === 0) {
+          const emptyCard = document.createElement("article");
+          emptyCard.className = "article-card";
+          emptyCard.innerHTML = `
+            <h2>No digest history yet</h2>
+            <p class="summary">Generate a digest to save a local preview record here.</p>
+          `;
+          historyList.appendChild(emptyCard);
+          return;
+        }
+
+        historyItems.forEach((record) => {
+          const card = document.createElement("article");
+          const selectedTopics = getSelectedHistoryTopics(record);
+          const articleCount = (record.articleTitles || []).length;
+
+          card.className = "article-card";
+          card.innerHTML = `
+            <h2>${escapeHtml(formatHistoryDate(record.dateGenerated))}</h2>
+            <p class="source">Local preview history only</p>
+            <p class="summary">${articleCount} article${articleCount === 1 ? "" : "s"} selected &middot; ${
+              escapeHtml(record.digestQuality)
+            }</p>
+            <dl class="meta">
+              <dt>Selected interests</dt>
+              <dd><span class="tag-list">${renderHistoryTags(selectedTopics)}</span></dd>
+              <dt>Priority topics</dt>
+              <dd><span class="tag-list">${renderHistoryTags(record.priorityTopics)}</span></dd>
+            </dl>
+            <div class="article-actions">
+              <button class="article-action" type="button" data-open-history="${record.id}">Open Summary</button>
+              <button class="remove-saved" type="button" data-delete-history="${record.id}">Delete</button>
+            </div>
+          `;
+
+          card.querySelector("[data-open-history]").addEventListener("click", () => renderHistoryDetail(record));
+          card.querySelector("[data-delete-history]").addEventListener("click", () => deleteHistoryItem(record.id));
+          historyList.appendChild(card);
+        });
+      }
+
+      function showDigestHistory() {
+        closeDigestSettingsPanel();
+        document.body.classList.remove("digest-mode");
+        document.body.classList.remove("read-later-mode");
+        document.body.classList.remove("settings-mode");
+        document.body.classList.add("history-mode");
+        digestLayout.hidden = true;
+        readLaterLayout.hidden = true;
+        historyLayout.hidden = false;
+        settingsLayout.hidden = true;
+        historyDetail.hidden = true;
+        historyDetail.innerHTML = "";
+        renderHistoryList();
+        window.scrollTo({ top: 0, behavior: getScrollBehavior() });
+      }
+
+      function showSettings() {
+        closeDigestSettingsPanel();
+        document.body.classList.remove("digest-mode");
+        document.body.classList.remove("read-later-mode");
+        document.body.classList.remove("history-mode");
+        document.body.classList.add("settings-mode");
+        digestLayout.hidden = true;
+        readLaterLayout.hidden = true;
+        historyLayout.hidden = true;
+        settingsLayout.hidden = false;
+        articlePreview.hidden = true;
+        articlePreview.innerHTML = "";
+        readLaterPreview.hidden = true;
+        readLaterPreview.innerHTML = "";
+        historyDetail.hidden = true;
+        historyDetail.innerHTML = "";
+        clearMessage();
+        window.scrollTo({ top: 0, behavior: getScrollBehavior() });
+      }
+
+      function openDigestSettingsPanel() {
+        settingsPanelContent.appendChild(settingsCard);
+        settingsPanelOverlay.hidden = false;
+        digestSettingsButton.setAttribute("aria-expanded", "true");
+        settingsPanelClose.focus();
+      }
+
+      function closeDigestSettingsPanel() {
+        if (settingsPanelOverlay.hidden) {
+          return;
+        }
+
+        settingsCardHome.appendChild(settingsCard);
+        settingsPanelOverlay.hidden = true;
+        digestSettingsButton.setAttribute("aria-expanded", "false");
+        digestSettingsButton.focus();
+      }
+
+      function handleSettingsPanelKeydown(event) {
+        if (event.key === "Escape" && !settingsPanelOverlay.hidden) {
+          closeDigestSettingsPanel();
+        }
+
+        if (event.key !== "Tab" || settingsPanelOverlay.hidden) {
+          return;
+        }
+
+        const focusableItems = [
+          ...settingsPanelOverlay.querySelectorAll(
+            'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])'
+          ),
+        ].filter((item) => !item.disabled && item.offsetParent !== null);
+
+        if (focusableItems.length === 0) {
+          return;
+        }
+
+        const firstItem = focusableItems[0];
+        const lastItem = focusableItems[focusableItems.length - 1];
+
+        if (event.shiftKey && document.activeElement === firstItem) {
+          event.preventDefault();
+          lastItem.focus();
+        } else if (!event.shiftKey && document.activeElement === lastItem) {
+          event.preventDefault();
+          firstItem.focus();
+        }
+      }
+
+      function updatePrioritySection() {
+        priorityList.innerHTML = "";
+        priorityTopics.hidden = selectedPriorityTopics.size === 0;
+
+        selectedPriorityTopics.forEach((topic) => {
+          const tag = document.createElement("span");
+          tag.className = "priority-tag";
+          tag.textContent = `📌 ${topic}`;
+          priorityList.appendChild(tag);
+        });
+      }
+
+      function updateTopicControlState(control, isSelected) {
+        const chip = control.querySelector(".chip");
+        const pin = control.querySelector(".pin-button");
+        const topic = control.dataset.topic;
+
+        if (!isSelected) {
+          selectedPriorityTopics.delete(topic);
+        }
+
+        const isPriority = isSelected && selectedPriorityTopics.has(topic);
+        control.classList.toggle("is-selected", isSelected);
+        chip.classList.toggle("is-priority", isPriority);
+        pin.setAttribute("aria-pressed", String(isPriority));
+        pin.setAttribute(
+          "aria-label",
+          isPriority ? `Remove ${topic} from priority topics` : `Mark ${topic} as a priority topic`
+        );
+        updatePrioritySection();
+      }
+
+      function createTopicControl(topic, selectedSet, datasetName, onSelectionChange) {
+        const control = document.createElement("span");
+        const chip = document.createElement("button");
+        const pin = document.createElement("button");
+
+        control.className = "topic-control";
+        control.dataset.topic = topic;
+
+        chip.type = "button";
+        chip.className = datasetName === "interest" ? "chip" : "chip sub-chip";
+        chip.textContent = topic;
+        chip.dataset[datasetName] = topic;
+        chip.setAttribute("aria-pressed", "false");
+
+        pin.type = "button";
+        pin.className = "pin-button";
+        pin.textContent = "📌";
+        pin.setAttribute("aria-pressed", "false");
+        pin.setAttribute("aria-label", `Mark ${topic} as a priority topic`);
+
+        chip.addEventListener("click", () => {
+          if (selectedSet.has(topic)) {
+            selectedSet.delete(topic);
+            chip.setAttribute("aria-pressed", "false");
+          } else {
+            selectedSet.add(topic);
+            chip.setAttribute("aria-pressed", "true");
+          }
+
+          updateTopicControlState(control, selectedSet.has(topic));
+          onSelectionChange();
+          clearMessage();
+          savePreferences();
+        });
+
+        pin.addEventListener("click", () => {
+          if (!selectedSet.has(topic)) {
+            return;
+          }
+
+          if (selectedPriorityTopics.has(topic)) {
+            selectedPriorityTopics.delete(topic);
+          } else {
+            selectedPriorityTopics.add(topic);
+          }
+
+          updateTopicControlState(control, true);
+          clearMessage();
+          savePreferences();
+        });
+
+        control.append(chip, pin);
+        return control;
+      }
+
+      function resetSubInterestControls(container, selectedSet) {
+        selectedSet.clear();
+        container.querySelectorAll(".topic-control").forEach((control) => {
+          const chip = control.querySelector(".chip");
+          chip.setAttribute("aria-pressed", "false");
+          updateTopicControlState(control, false);
+        });
+      }
+
+      function resetSportSubInterests() {
+        resetSubInterestControls(sportSubChips, selectedSportSubInterests);
+      }
+
+      function resetMusicSubInterests() {
+        resetSubInterestControls(musicSubChips, selectedMusicSubInterests);
+      }
+
+      function resetEntertainmentSubInterests() {
+        resetSubInterestControls(entertainmentSubChips, selectedEntertainmentSubInterests);
+      }
+
+      function resetBooksSubInterests() {
+        resetSubInterestControls(booksSubChips, selectedBooksSubInterests);
+      }
+
+      function updateSportSubSection() {
+        const shouldShowSports = selectedInterests.has("Sport");
+        sportSubSection.hidden = !shouldShowSports;
+
+        if (!shouldShowSports) {
+          resetSportSubInterests();
+        }
+      }
+
+      function updateMusicSubSection() {
+        const shouldShowMusic = selectedInterests.has("Music");
+        musicSubSection.hidden = !shouldShowMusic;
+
+        if (!shouldShowMusic) {
+          resetMusicSubInterests();
+        }
+      }
+
+      function updateEntertainmentSubSection() {
+        const shouldShowEntertainment = selectedInterests.has("Entertainment");
+        entertainmentSubSection.hidden = !shouldShowEntertainment;
+
+        if (!shouldShowEntertainment) {
+          resetEntertainmentSubInterests();
+        }
+      }
+
+      function updateBooksSubSection() {
+        const shouldShowBooks = selectedInterests.has("Books");
+        booksSubSection.hidden = !shouldShowBooks;
+
+        if (!shouldShowBooks) {
+          resetBooksSubInterests();
+        }
+      }
+
+      function createInterestChips() {
+        interests.forEach((interest) => {
+          const control = createTopicControl(interest, selectedInterests, "interest", () => {
+            updateSportSubSection();
+            updateMusicSubSection();
+            updateEntertainmentSubSection();
+            updateBooksSubSection();
+          });
+          chipsContainer.appendChild(control);
+        });
+      }
+
+      function createSportSubInterestChips() {
+        sportSubInterests.forEach((interest) => {
+          sportSubChips.appendChild(createTopicControl(interest, selectedSportSubInterests, "sportInterest", () => {}));
+        });
+      }
+
+      function createMusicSubInterestChips() {
+        musicSubInterests.forEach((interest) => {
+          musicSubChips.appendChild(createTopicControl(interest, selectedMusicSubInterests, "musicInterest", () => {}));
+        });
+      }
+
+      function createEntertainmentSubInterestChips() {
+        entertainmentSubInterests.forEach((interest) => {
+          entertainmentSubChips.appendChild(
+            createTopicControl(interest, selectedEntertainmentSubInterests, "entertainmentInterest", () => {})
+          );
+        });
+      }
+
+      function createBooksSubInterestChips() {
+        booksSubInterests.forEach((interest) => {
+          booksSubChips.appendChild(createTopicControl(interest, selectedBooksSubInterests, "booksInterest", () => {}));
+        });
+      }
+
+      function getArticleTopics(article) {
+        return [...new Set([
+          ...article.interests.filter((interest) => articleMatchesMainInterest(article, interest)),
+          ...(article.sportInterests || []),
+          ...(article.musicInterests || []),
+          ...(article.entertainmentInterests || []),
+          ...(article.booksInterests || []),
+        ])];
+      }
+
+      function createSlug(text) {
+        return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      }
+
+      function getSelectedDigestGroups() {
+        const groups = [];
+
+        interests.forEach((interest) => {
+          if (!selectedInterests.has(interest)) {
+            return;
+          }
+
+          if (interest === "Sport") {
+            groups.push({
+              label: "Sport",
+              subtopics: [...selectedSportSubInterests],
+              articleField: "sportInterests",
+            });
+            return;
+          }
+
+          if (interest === "Music") {
+            groups.push({
+              label: "Music",
+              subtopics: [...selectedMusicSubInterests],
+              articleField: "musicInterests",
+            });
+            return;
+          }
+
+          if (interest === "Entertainment") {
+            groups.push({
+              label: "Entertainment",
+              subtopics: [...selectedEntertainmentSubInterests],
+              articleField: "entertainmentInterests",
+            });
+            return;
+          }
+
+          if (interest === "Books") {
+            groups.push({
+              label: "Books",
+              subtopics: [...selectedBooksSubInterests],
+              articleField: "booksInterests",
+            });
+            return;
+          }
+
+          groups.push({
+            label: interest,
+            subtopics: [],
+            articleField: "interests",
+          });
+        });
+
+        return groups;
+      }
+
+      function groupMatchesArticle(group, article) {
+        return getGroupMatchScore(group, article) > 0;
+      }
+
+      function getGroupMatchScore(group, article) {
+        if (group.subtopics.length > 0) {
+          return group.subtopics.some((topic) => (article[group.articleField] || []).includes(topic)) ? 4 : 0;
+        }
+
+        if (!articleMatchesMainInterest(article, group.label)) {
+          return 0;
+        }
+
+        if (article.isFallback || article.primaryInterest === group.label) {
+          return 3;
+        }
+
+        return 2;
+      }
+
+      function getArticleGroup(article, groups) {
+        return (
+          [...groups]
+            .map((group) => ({
+              group,
+              score:
+                getGroupMatchScore(group, article) +
+                (article.priorityMatches.some((topic) => topic === group.label || group.subtopics.includes(topic)) ? 10 : 0),
+            }))
+            .filter((item) => item.score > 0)
+            .sort((first, second) => second.score - first.score)[0]?.group || groups[0]
+        );
+      }
+
+      function setActiveTopic(label) {
+        topicNav.querySelectorAll(".topic-link").forEach((button) => {
+          button.classList.toggle("is-active", button.dataset.topic === label);
+        });
+      }
+
+      function renderSidebar(groups, groupedArticles) {
+        topicNav.innerHTML = "";
+
+        groups.forEach((group) => {
+          const button = document.createElement("button");
+          const groupId = `group-${createSlug(group.label)}`;
+          const articleCount = groupedArticles.get(group.label)?.length || 0;
+          const subtextParts = [];
+
+          if (group.subtopics.length > 0) {
+            subtextParts.push(group.subtopics.join(", "));
+          }
+
+          subtextParts.push(`${articleCount} article${articleCount === 1 ? "" : "s"}`);
+
+          button.type = "button";
+          button.className = "topic-link";
+          button.dataset.topic = group.label;
+          button.innerHTML = `${group.label}<span class="topic-subtext">${subtextParts.join(" · ")}</span>`;
+
+          button.addEventListener("click", () => {
+            const target = document.querySelector(`#${groupId}`);
+            if (target) {
+              target.scrollIntoView({ behavior: getScrollBehavior(), block: "start" });
+            }
+            setActiveTopic(group.label);
+          });
+
+          topicNav.appendChild(button);
+        });
+
+        setActiveTopic(groups[0]?.label || "");
+      }
+
+      function renderSidebarPriorities() {
+        sidebarPriorityList.innerHTML = "";
+        sidebarPriorities.hidden = selectedPriorityTopics.size === 0;
+
+        selectedPriorityTopics.forEach((topic) => {
+          const tag = document.createElement("span");
+          tag.className = "priority-tag";
+          tag.textContent = `📌 ${topic}`;
+          sidebarPriorityList.appendChild(tag);
+        });
+      }
+
+      function getDigestQuality(matchingArticles) {
+        const selectedCount = matchingArticles.length;
+        const averageScore =
+          selectedCount === 0
+            ? 0
+            : matchingArticles.reduce((total, article) => total + article.score, 0) / selectedCount;
+
+        if (selectedCount >= 5 && averageScore >= 1.4) {
+          return {
+            stars: "⭐⭐⭐⭐☆",
+            label: "Excellent Match",
+            sentence: "Your digest strongly matches your interests today.",
+          };
+        }
+
+        if (selectedCount >= 3) {
+          return {
+            stars: "⭐⭐⭐☆☆",
+            label: "Good Match",
+            sentence: "Your digest has a useful mix of stories connected to your interests.",
+          };
+        }
+
+        return {
+          stars: "⭐⭐☆☆☆",
+          label: "Limited Matches",
+          sentence: "Your digest has a small number of matches today. Try adding more interests for a fuller brief.",
+        };
+      }
+
+      function getTopicIcon(topic) {
+        const topicIcons = {
+          AI: "🤖",
+          Technology: "💻",
+          Business: "💼",
+          Sport: "🏟️",
+          "Formula 1": "🏎️",
+          Football: "⚽",
+          Netball: "🏐",
+          NFL: "🏈",
+          Tennis: "🎾",
+          Volleyball: "🏐",
+          "Other Sport": "🏟️",
+          Music: "🎵",
+          Pop: "🎵",
+          Rock: "🎸",
+          Rap: "🎤",
+          "R&B": "🎧",
+          Indie: "🎶",
+          Electronic: "🎛️",
+          Classical: "🎻",
+          "Musical Theatre": "🎭",
+          "Other Music": "🎵",
+          Entertainment: "🎬",
+          Movies: "🎬",
+          "TV Shows": "📺",
+          Theatre: "🎭",
+          Celebrities: "⭐",
+          Awards: "🏆",
+          Streaming: "▶️",
+          "Other Entertainment": "🎬",
+          Science: "🔬",
+          Gaming: "🎮",
+          Books: "📚",
+          Fantasy: "🐉",
+          Romance: "♡",
+          Mystery: "🔎",
+          Thriller: "!",
+          "Sci-Fi": "🚀",
+          "Young Adult": "📖",
+          "Literary Fiction": "✒",
+          "Non-Fiction": "📘",
+          "Other Books": "📚",
+          "World News": "🌍",
+        };
+
+        return topicIcons[topic] || "•";
+      }
+
+      function getPrimaryArticleTopic(article) {
+        return getDisplayMatches(article)[0] || getArticleTopics(article)[0] || "Daily Radar";
+      }
+
+      function getTopicCoverage(matchingArticles) {
+        if (matchingArticles.length === 0) {
+          return [];
+        }
+
+        const coverageCounts = new Map();
+
+        matchingArticles.forEach((article) => {
+          getDisplayMatches(article).forEach((topic) => {
+            coverageCounts.set(topic, (coverageCounts.get(topic) || 0) + 1);
+          });
+        });
+
+        return [...coverageCounts.entries()]
+          .map(([topic, count]) => ({
+            topic,
+            count,
+            percent: Math.round((count / matchingArticles.length) * 100),
+          }))
+          .sort((first, second) => second.percent - first.percent || first.topic.localeCompare(second.topic));
+      }
+
+      function getRadarSummary(coverageItems) {
+        if (coverageItems.length === 0) {
+          return "No RSS articles matched your selected interests today, so there is no topic coverage to summarise yet.";
+        }
+
+        const heavyTopics = coverageItems.filter((item) => item.percent >= 40).map((item) => item.topic);
+        const moderateTopic = coverageItems.find((item) => item.percent >= 20 && item.percent < 40);
+        const lightTopic = coverageItems.find((item) => item.percent > 0 && item.percent < 20);
+
+        if (heavyTopics.length >= 2) {
+          return `Today's digest is heavily focused on ${heavyTopics.slice(0, 2).join(" and ")}.`;
+        }
+
+        if (heavyTopics.length === 1) {
+          return `Today's digest is heavily focused on ${heavyTopics[0]}.`;
+        }
+
+        if (moderateTopic) {
+          return `There was moderate coverage of ${moderateTopic.topic}.`;
+        }
+
+        if (lightTopic) {
+          return `Very little matched your ${lightTopic.topic} interests today.`;
+        }
+
+        return "Today's digest has a balanced spread across your selected interests.";
+      }
+
+      function renderDigestAnalytics(matchingArticles) {
+        const coverageItems = getTopicCoverage(matchingArticles);
+
+        digestAnalytics.hidden = false;
+        coverageList.innerHTML = "";
+
+        if (coverageItems.length === 0) {
+          coverageList.innerHTML = '<p class="radar-summary">No topics appeared in this digest yet.</p>';
+        } else {
+          coverageItems.forEach((item) => {
+            const row = document.createElement("div");
+
+            row.className = "coverage-row";
+            row.innerHTML = `
+              <span class="coverage-topic">${getTopicIcon(item.topic)} ${item.topic}</span>
+              <span class="progress-track" aria-label="${item.topic} coverage ${item.percent}%">
+                <span class="progress-fill" style="width: ${item.percent}%"></span>
+              </span>
+              <span class="coverage-percent">${item.percent}%</span>
+            `;
+            coverageList.appendChild(row);
+          });
+        }
+
+        radarSummary.textContent = getRadarSummary(coverageItems);
+        renderReadingGoal();
+      }
+
+      function renderMorningBrief(matchingArticles) {
+        const quality = getDigestQuality(matchingArticles);
+        const selectedCount = matchingArticles.length;
+        const estimatedMinutes = selectedCount === 0 ? 0 : Math.max(1, Math.ceil(selectedCount * 1.8));
+
+        briefDate.textContent = new Intl.DateTimeFormat("en-GB", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }).format(new Date());
+        articlesAnalysed.textContent = mockArticles.length;
+        articlesSelected.textContent = selectedCount;
+        readingTime.textContent = `${estimatedMinutes} min`;
+        qualityStars.textContent = quality.stars;
+        qualityLabel.textContent = quality.label;
+        qualitySentence.textContent = quality.sentence;
+
+        briefPriorityList.innerHTML = "";
+        briefPriorities.hidden = selectedPriorityTopics.size === 0;
+
+        selectedPriorityTopics.forEach((topic) => {
+          const tag = document.createElement("span");
+          tag.className = "priority-tag";
+          tag.textContent = `📌 ${topic}`;
+          briefPriorityList.appendChild(tag);
+        });
+      }
+
+      function renderArticleCard(article) {
+        const card = document.createElement("article");
+        card.className = "article-card";
+
+        const articleId = getArticleId(article);
+        const primaryTopic = getPrimaryArticleTopic(article);
+        const tags = getDisplayMatches(article).map((interest) => `<span class="tag">${escapeHtml(interest)}</span>`).join("");
+        const isSaved = savedArticleIds.has(articleId);
+        const publishedAgo = article.publishedAgo || "Today";
+        const readingMinutes = article.readingMinutes || 4;
+        const sourceLink = article.sourceUrl
+          ? `<a class="article-action" href="${escapeHtml(article.sourceUrl)}" target="_blank" rel="noopener noreferrer">Open Source</a>`
+          : "";
+
+        card.innerHTML = `
+          <div class="article-card-header">
+            <span class="article-topic-icon" aria-hidden="true">${getTopicIcon(primaryTopic)}</span>
+            <div>
+              <h2>${escapeHtml(getDisplayTitle(article))}</h2>
+              <p class="source">${escapeHtml(article.source)}</p>
+              <p class="article-timing">${escapeHtml(publishedAgo)} · ${readingMinutes} min read</p>
+            </div>
+          </div>
+          <p class="summary">${escapeHtml(article.summary)}</p>
+          <dl class="meta">
+            <dt>Matching interests</dt>
+            <dd><span class="tag-list">${tags}</span></dd>
+            <dt>Why this was included</dt>
+            <dd>${escapeHtml(article.reason)}</dd>
+          </dl>
+          <div class="article-actions">
+            <button class="article-action" type="button" data-preview-article="${articleId}">Read Preview</button>
+            ${sourceLink}
+            <button class="article-action" type="button" data-save-article="${articleId}" ${isSaved ? "disabled" : ""}>${
+              isSaved ? "Saved" : "Save for Later"
+            }</button>
+          </div>
+        `;
+
+        card.querySelector("[data-preview-article]").addEventListener("click", () => {
+          const previewTarget = document.body.classList.contains("read-later-mode") ? readLaterPreview : articlePreview;
+          showArticlePreview(articleId, previewTarget);
+        });
+        card.querySelector("[data-save-article]").addEventListener("click", () => saveArticle(articleId));
+
+        return card;
+      }
+
+      function findMatchingArticles() {
+        return mockArticles
+          .map((article) => {
+            const interestMatches = [...selectedInterests].filter((interest) =>
+              articleMatchesMainInterest(article, interest)
+            );
+            const sportMatches = selectedInterests.has("Sport")
+              ? (article.sportInterests || []).filter((interest) => selectedSportSubInterests.has(interest))
+              : [];
+            const musicMatches = selectedInterests.has("Music")
+              ? (article.musicInterests || []).filter((interest) => selectedMusicSubInterests.has(interest))
+              : [];
+            const entertainmentMatches = selectedInterests.has("Entertainment")
+              ? (article.entertainmentInterests || []).filter((interest) =>
+                  selectedEntertainmentSubInterests.has(interest)
+                )
+              : [];
+            const booksMatches = selectedInterests.has("Books")
+              ? (article.booksInterests || []).filter((interest) => selectedBooksSubInterests.has(interest))
+              : [];
+            const matches = [
+              ...interestMatches,
+              ...sportMatches,
+              ...musicMatches,
+              ...entertainmentMatches,
+              ...booksMatches,
+            ];
+            const articleTopics = getArticleTopics(article);
+            const priorityMatches = [...selectedPriorityTopics].filter((topic) => articleTopics.includes(topic));
+            const score = matches.length + priorityMatches.length * 2;
+
+            return { ...article, matches, priorityMatches, score };
+          })
+          .filter((article) => article.matches.length > 0)
+          .sort(
+            (first, second) =>
+              second.score - first.score ||
+              second.priorityMatches.length - first.priorityMatches.length ||
+              second.matches.length - first.matches.length
+          )
+          .slice(0, 5);
+      }
+
+      function getArticleSearchText(article) {
+        return [
+          getDisplayTitle(article),
+          article.source,
+          article.summary,
+          article.reason,
+          ...getDisplayMatches(article),
+        ]
+          .join(" ")
+          .toLowerCase();
+      }
+
+      function getVisibleDigestKeywords() {
+        const stopWords = new Set([
+          "about",
+          "after",
+          "again",
+          "article",
+          "daily",
+          "from",
+          "have",
+          "into",
+          "more",
+          "news",
+          "only",
+          "preview",
+          "that",
+          "their",
+          "this",
+          "today",
+          "with",
+          "while",
+        ]);
+        const counts = new Map();
+
+        currentDigestArticles.forEach((article) => {
+          const words = getArticleSearchText(article).match(/[a-z0-9][a-z0-9-]{3,}/g) || [];
+
+          words.forEach((word) => {
+            if (!stopWords.has(word)) {
+              counts.set(word, (counts.get(word) || 0) + 1);
+            }
+          });
+        });
+
+        return [...counts.entries()]
+          .sort((first, second) => second[1] - first[1] || first[0].localeCompare(second[0]))
+          .map(([word]) => word)
+          .slice(0, 8);
+      }
+
+      function getDigestSearchSuggestions(query = "") {
+        const selectedTopics = [
+          ...selectedInterests,
+          ...selectedSportSubInterests,
+          ...selectedMusicSubInterests,
+          ...selectedEntertainmentSubInterests,
+          ...selectedBooksSubInterests,
+        ];
+        const suggestions = [
+          ...currentDigestArticles.map((article) => getDisplayTitle(article)),
+          ...currentDigestArticles.map((article) => article.source),
+          ...selectedTopics,
+          ...getVisibleDigestKeywords(),
+        ];
+        const normalisedQuery = query.trim().toLowerCase();
+        const uniqueSuggestions = [...new Set(suggestions.filter(Boolean))];
+
+        return uniqueSuggestions
+          .filter((suggestion) => !normalisedQuery || suggestion.toLowerCase().includes(normalisedQuery))
+          .slice(0, 6);
+      }
+
+      function hideSearchSuggestions() {
+        searchSuggestions.hidden = true;
+        searchSuggestions.innerHTML = "";
+      }
+
+      function renderSearchSuggestions(query = "") {
+        const suggestions = getDigestSearchSuggestions(query);
+
+        searchSuggestions.innerHTML = "";
+
+        if (suggestions.length === 0) {
+          hideSearchSuggestions();
+          return;
+        }
+
+        suggestions.forEach((suggestion) => {
+          const button = document.createElement("button");
+
+          button.type = "button";
+          button.className = "suggestion-button";
+          button.setAttribute("role", "option");
+          button.textContent = suggestion;
+          button.addEventListener("click", () => {
+            digestSearchInput.value = suggestion;
+            applyDigestSearch(suggestion);
+          });
+          searchSuggestions.appendChild(button);
+        });
+
+        searchSuggestions.hidden = false;
+      }
+
+      function searchMatchesArticle(article, query) {
+        return getArticleSearchText(article).includes(query.trim().toLowerCase());
+      }
+
+      function applyDigestSearch(query) {
+        const searchTerm = query.trim();
+
+        if (!searchTerm) {
+          clearDigestSearch();
+          return;
+        }
+
+        currentSearchTerm = searchTerm;
+        hideSearchSuggestions();
+        clearSearchButton.hidden = false;
+        renderDigestArticleSections(currentDigestArticles.filter((article) => searchMatchesArticle(article, searchTerm)), {
+          searchTerm,
+        });
+      }
+
+      function clearDigestSearch() {
+        currentSearchTerm = "";
+        digestSearchInput.value = "";
+        clearSearchButton.hidden = true;
+        hideSearchSuggestions();
+        searchResultsMessage.textContent = "";
+        renderDigestArticleSections(currentDigestArticles);
+      }
+
+      function renderDigestArticleSections(articles, options = {}) {
+        const searchTerm = options.searchTerm || "";
+        const isSearching = Boolean(searchTerm);
+        const groupedArticles = new Map(currentDigestGroups.map((group) => [group.label, []]));
+        const groupsToRender = isSearching
+          ? currentDigestGroups.filter((group) =>
+              articles.some((article) => getArticleGroup(article, currentDigestGroups).label === group.label)
+            )
+          : currentDigestGroups;
+
+        digest.innerHTML = "";
+
+        articles.forEach((article) => {
+          const group = getArticleGroup(article, currentDigestGroups);
+          groupedArticles.get(group.label).push(article);
+        });
+
+        renderSidebar(groupsToRender.length > 0 ? groupsToRender : currentDigestGroups, groupedArticles);
+
+        if (isSearching) {
+          searchResultsMessage.textContent =
+            articles.length === 0
+              ? `No articles found for "${searchTerm}".`
+              : `Showing ${articles.length} result${articles.length === 1 ? "" : "s"} for ${searchTerm}`;
+        }
+
+        if (isSearching && articles.length === 0) {
+          const emptyCard = document.createElement("article");
+
+          emptyCard.className = "article-card";
+          emptyCard.innerHTML = `
+            <h2>No articles found for this search</h2>
+            <p class="summary">No articles found for this search. Try another keyword or clear the search.</p>
+          `;
+          digest.appendChild(emptyCard);
+          updateSaveButtons();
+          return;
+        }
+
+        groupsToRender.forEach((group) => {
+          const groupArticles = groupedArticles.get(group.label) || [];
+          const section = document.createElement("section");
+          const articleList = document.createElement("div");
+
+          section.className = "article-group";
+          section.id = `group-${createSlug(group.label)}`;
+          articleList.className = "article-list";
+          section.innerHTML = `<h3>${group.label}</h3>`;
+
+          if (groupArticles.length === 0) {
+            const emptyTopicCard = document.createElement("article");
+            const subtopicText = group.subtopics.length > 0 ? ` for ${group.subtopics.join(", ")}` : "";
+
+            emptyTopicCard.className = "article-card";
+            emptyTopicCard.innerHTML = `
+              <h2>Little ${group.label} coverage today</h2>
+              <p class="summary">There is limited RSS coverage${subtopicText} in this generated digest. Try another related interest or check again later.</p>
+            `;
+            articleList.appendChild(emptyTopicCard);
+          } else {
+            groupArticles.forEach((article) => {
+              articleList.appendChild(renderArticleCard(article));
+            });
+          }
+
+          section.appendChild(articleList);
+          digest.appendChild(section);
+        });
+
+        updateSaveButtons();
+
+        if (!isSearching && articles.length === 0 && digest.children.length === 0) {
+          const emptyCard = document.createElement("article");
+
+          emptyCard.className = "article-card";
+          emptyCard.innerHTML = `
+            <h2>No matching RSS articles yet</h2>
+            <p class="summary">There is limited RSS coverage for this selection today. Try choosing one or two broader interests, then generate the digest again.</p>
+          `;
+          digest.appendChild(emptyCard);
+        }
+      }
+
+      async function renderDigest() {
+        closeDigestSettingsPanel();
+        digest.innerHTML = "";
+        topicNav.innerHTML = "";
+        articlePreview.hidden = true;
+        articlePreview.innerHTML = "";
+        digestAnalytics.hidden = true;
+        coverageList.innerHTML = "";
+        radarSummary.textContent = "";
+        feedStatusMessage.textContent = "";
+
+        if (selectedInterests.size === 0) {
+          message.textContent = "Pick at least one interest first, then generate your digest.";
+          message.classList.add("error");
+          return;
+        }
+
+        showDigestLoading();
+        message.classList.remove("error");
+        message.textContent = "";
+
+        try {
+          await loadRssArticles();
+        } catch {
+          mockArticles = [];
+        } finally {
+          hideDigestLoading();
+        }
+
+        let matchingArticles = findMatchingArticles();
+
+        feedDebug.matched = matchingArticles.length;
+        console.info("Daily Radar match debug", feedDebug);
+        saveDigestRecord(matchingArticles);
+        message.classList.remove("error");
+        message.textContent =
+          matchingArticles.length === 0
+            ? usingFallbackArticles
+              ? "No demo fallback articles matched those interests. Try a broader mix."
+              : "No RSS articles matched those interests today. Try a broader mix."
+            : `Showing ${matchingArticles.length} ${usingFallbackArticles ? "fallback mock" : "RSS"} article${
+                matchingArticles.length === 1 ? "" : "s"
+              }.`;
+
+        document.body.classList.add("digest-mode");
+        document.body.classList.remove("read-later-mode");
+        document.body.classList.remove("history-mode");
+        document.body.classList.remove("settings-mode");
+        digestLayout.hidden = false;
+        readLaterLayout.hidden = true;
+        historyLayout.hidden = true;
+        settingsLayout.hidden = true;
+
+        currentDigestArticles = matchingArticles;
+        currentDigestGroups = getSelectedDigestGroups();
+        currentSearchTerm = "";
+        digestSearchInput.value = "";
+        clearSearchButton.hidden = true;
+        hideSearchSuggestions();
+        searchResultsMessage.textContent = "";
+
+        renderSidebarPriorities();
+        renderMorningBrief(matchingArticles);
+        renderDigestAnalytics(matchingArticles);
+        renderFeedStatus();
+
+        digestSummary.textContent =
+          matchingArticles.length === 0
+            ? usingFallbackArticles
+              ? "No demo fallback articles matched this selection today."
+              : "No RSS articles matched this selection today."
+            : `${matchingArticles.length} ${usingFallbackArticles ? "fallback mock" : "RSS"} article${
+                matchingArticles.length === 1 ? "" : "s"
+              } grouped by your selected topics.`;
+
+        renderDigestArticleSections(matchingArticles);
+      }
+
+      function showInterestEditor() {
+        closeDigestSettingsPanel();
+        hideDigestLoading();
+        document.body.classList.remove("digest-mode");
+        document.body.classList.remove("read-later-mode");
+        document.body.classList.remove("history-mode");
+        document.body.classList.remove("settings-mode");
+        digestLayout.hidden = true;
+        readLaterLayout.hidden = true;
+        historyLayout.hidden = true;
+        settingsLayout.hidden = true;
+        digest.innerHTML = "";
+        topicNav.innerHTML = "";
+        articlePreview.hidden = true;
+        articlePreview.innerHTML = "";
+        digestAnalytics.hidden = true;
+        coverageList.innerHTML = "";
+        radarSummary.textContent = "";
+        readLaterPreview.hidden = true;
+        readLaterPreview.innerHTML = "";
+        historyDetail.hidden = true;
+        historyDetail.innerHTML = "";
+        window.scrollTo({ top: 0, behavior: getScrollBehavior() });
+      }
+
+      createInterestChips();
+      createSportSubInterestChips();
+      createMusicSubInterestChips();
+      createEntertainmentSubInterestChips();
+      createBooksSubInterestChips();
+      restoreAccessibilityPreferences();
+      restorePreferences();
+      generateButton.addEventListener("click", renderDigest);
+      backButton.addEventListener("click", showInterestEditor);
+      resetPreferencesButton.addEventListener("click", resetPreferences);
+      readLaterButton.addEventListener("click", showReadLater);
+      sidebarReadLaterButton.addEventListener("click", showReadLater);
+      readLaterBackButton.addEventListener("click", showInterestEditor);
+      historyButton.addEventListener("click", showDigestHistory);
+      sidebarHistoryButton.addEventListener("click", showDigestHistory);
+      historyBackButton.addEventListener("click", showInterestEditor);
+      settingsButton.addEventListener("click", showSettings);
+      settingsBackButton.addEventListener("click", showInterestEditor);
+      digestSettingsButton.addEventListener("click", openDigestSettingsPanel);
+      settingsPanelClose.addEventListener("click", closeDigestSettingsPanel);
+      settingsPanelOverlay.addEventListener("click", (event) => {
+        if (event.target === settingsPanelOverlay) {
+          closeDigestSettingsPanel();
+        }
+      });
+      document.addEventListener("keydown", handleSettingsPanelKeydown);
+      digestSearchForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        applyDigestSearch(digestSearchInput.value);
+      });
+      digestSearchInput.addEventListener("input", () => {
+        renderSearchSuggestions(digestSearchInput.value);
+      });
+      digestSearchInput.addEventListener("focus", () => {
+        renderSearchSuggestions(digestSearchInput.value);
+      });
+      digestSearchInput.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          if (!searchSuggestions.hidden) {
+            hideSearchSuggestions();
+          } else if (currentSearchTerm) {
+            clearDigestSearch();
+          }
+        }
+
+        if (event.key === "ArrowDown" && !searchSuggestions.hidden) {
+          const firstSuggestion = searchSuggestions.querySelector(".suggestion-button");
+
+          if (firstSuggestion) {
+            event.preventDefault();
+            firstSuggestion.focus();
+          }
+        }
+      });
+      searchSuggestions.addEventListener("keydown", (event) => {
+        const suggestions = [...searchSuggestions.querySelectorAll(".suggestion-button")];
+        const currentIndex = suggestions.indexOf(document.activeElement);
+
+        if (event.key === "Escape") {
+          hideSearchSuggestions();
+          digestSearchInput.focus();
+        } else if (event.key === "ArrowDown" && currentIndex < suggestions.length - 1) {
+          event.preventDefault();
+          suggestions[currentIndex + 1].focus();
+        } else if (event.key === "ArrowUp" && currentIndex > 0) {
+          event.preventDefault();
+          suggestions[currentIndex - 1].focus();
+        } else if (event.key === "ArrowUp" && currentIndex === 0) {
+          event.preventDefault();
+          digestSearchInput.focus();
+        }
+      });
+      clearSearchButton.addEventListener("click", clearDigestSearch);
+      accessibilityToggles.forEach((toggle) => {
+        toggle.addEventListener("change", () => {
+          updateAccessibilityPreference(toggle.dataset.accessibilitySetting, toggle.checked);
+        });
+      });
+    </script>
+  </body>
+</html>
