@@ -267,6 +267,34 @@
         font-weight: 700;
       }
 
+      .app-feedback {
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-weight: 700;
+        margin: 0;
+        padding: 12px 0;
+      }
+
+      .app-feedback[hidden] {
+        display: none;
+      }
+
+      .app-footer {
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        justify-content: space-between;
+        margin-top: 40px;
+        padding-top: 18px;
+        font-size: 0.92rem;
+      }
+
+      .app-footer p {
+        margin: 0;
+      }
+
       .loading-panel {
         border: 2px solid var(--text);
         border-radius: 8px;
@@ -371,6 +399,7 @@
       .article-action:focus-visible,
       .preview-close:focus-visible,
       .remove-saved:focus-visible,
+      .trending-chip:focus-visible,
       .digest-settings-button:focus-visible,
       .settings-close:focus-visible,
       .back-button:focus-visible,
@@ -671,6 +700,44 @@
         margin: 10px 0 0;
       }
 
+      .now-trending {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin: 0 0 20px;
+        padding: 18px;
+      }
+
+      .now-trending[hidden] {
+        display: none;
+      }
+
+      .now-trending h3 {
+        margin: 0 0 8px;
+      }
+
+      .trending-explanation {
+        color: var(--muted);
+        margin: 0 0 14px;
+      }
+
+      .trending-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .trending-chip {
+        appearance: none;
+        border: 1px solid var(--text);
+        border-radius: 999px;
+        background: var(--background);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+        padding: 8px 12px;
+      }
+
       .quality-stars {
         color: var(--text);
         font-size: 1.25rem;
@@ -835,6 +902,8 @@
       }
 
       .article-topic-icon {
+        align-items: center;
+        background: var(--soft);
         border: 1px solid var(--border);
         border-radius: 999px;
         display: grid;
@@ -860,6 +929,16 @@
         color: var(--muted);
         font-size: 0.9rem;
         margin: 0;
+      }
+
+      .radar-score {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        display: inline-flex;
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-top: 8px;
+        padding: 6px 10px;
       }
 
       .summary {
@@ -957,6 +1036,47 @@
         border: 1px solid var(--border);
         border-radius: 8px;
         padding: 18px;
+      }
+
+      #settingsCardHome {
+        display: grid;
+        gap: 18px;
+      }
+
+      .settings-status-card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        display: grid;
+        gap: 8px;
+        padding: 16px 18px;
+      }
+
+      .settings-status-card p {
+        margin: 0;
+      }
+
+      .settings-status-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .settings-status-meta span {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 6px 10px;
+      }
+
+      #morningDigestStatusCard {
+        order: 0;
+      }
+
+      #morningDigestCard {
+        order: 1;
+      }
+
+      #accessibilitySettingsCard {
+        order: 2;
       }
 
       .settings-panel-overlay {
@@ -1139,6 +1259,10 @@
           grid-template-columns: 1fr;
         }
 
+        .article-card-header {
+          grid-template-columns: auto 1fr;
+        }
+
         .preview-header {
           display: grid;
         }
@@ -1156,6 +1280,7 @@
         <h1>Daily Radar</h1>
         <p class="intro">Choose your interests and preview a personalised daily digest.</p>
       </header>
+      <p class="app-feedback" id="appFeedback" role="status" aria-live="polite" hidden></p>
 
       <section class="controls" aria-labelledby="interests-heading">
         <span class="section-label" id="interests-heading">Choose your interests</span>
@@ -1168,6 +1293,7 @@
             <button class="secondary-action" id="readLaterButton" type="button">Read Later</button>
             <button class="secondary-action" id="historyButton" type="button">Digest History</button>
             <button class="secondary-action" id="settingsButton" type="button">Settings</button>
+            <button class="secondary-action" id="morningDigestButton" type="button">Morning Digest</button>
             <button class="reset-preferences" id="resetPreferencesButton" type="button">Reset Preferences</button>
           </div>
         </div>
@@ -1180,7 +1306,7 @@
 
       <section class="loading-panel" id="digestLoadingPanel" aria-live="polite" aria-busy="true" hidden>
         <div class="loading-spinner" aria-hidden="true"></div>
-        <h2>Building your Daily Radar...</h2>
+        <h2 id="loadingMessage">Building your Daily Radar...</h2>
         <div class="loading-steps">
           <p>Scanning your RSS feeds...</p>
           <p>Finding articles that match your interests...</p>
@@ -1194,6 +1320,8 @@
             <button class="back-button" id="backButton" type="button">Back to Interests</button>
             <button class="secondary-action" id="sidebarReadLaterButton" type="button">Read Later</button>
             <button class="secondary-action" id="sidebarHistoryButton" type="button">Digest History</button>
+            <button class="secondary-action" id="sidebarMorningDigestButton" type="button">Morning Digest</button>
+            <button class="secondary-action" id="sidebarPreviewMorningEmailButton" type="button">Preview Morning Email</button>
           </div>
           <span class="section-label">Selected Topics</span>
           <nav class="topic-nav" id="topicNav" aria-label="Digest sections"></nav>
@@ -1262,6 +1390,13 @@
               <p class="search-results-message" id="searchResultsMessage" aria-live="polite"></p>
             </form>
           </div>
+          <section class="now-trending" id="nowTrending" aria-labelledby="nowTrendingHeading" hidden>
+            <h3 id="nowTrendingHeading">Now Trending</h3>
+            <p class="trending-explanation" id="trendingExplanation">
+              Trending topics are based on repeated keywords in today's loaded articles.
+            </p>
+            <div class="trending-chips" id="trendingChips"></div>
+          </section>
           <section class="digest-analytics" id="digestAnalytics" aria-label="Digest insights" hidden>
             <h3 class="insights-title">Insights</h3>
             <div class="insights-grid">
@@ -1313,7 +1448,15 @@
           <p class="intro">Accessibility options are saved in this browser only.</p>
         </div>
         <div id="settingsCardHome">
-        <section class="settings-card" aria-labelledby="accessibility-heading">
+        <section class="settings-status-card" id="morningDigestStatusCard" aria-label="Morning Digest status">
+          <p><strong>Morning Digest</strong></p>
+          <div class="settings-status-meta">
+            <span id="morningDigestStatusState">Off</span>
+            <span id="morningDigestStatusTime">Delivery time: 08:00</span>
+            <span>Preview only</span>
+          </div>
+        </section>
+        <section class="settings-card" id="accessibilitySettingsCard" aria-labelledby="accessibility-heading">
           <h3 id="accessibility-heading">Accessibility</h3>
           <p class="settings-save-message" id="settingsSaveMessage" role="status" aria-live="polite" hidden></p>
           <div class="settings-list">
@@ -1361,6 +1504,29 @@
             </label>
           </div>
         </section>
+        <section class="settings-card" id="morningDigestCard" aria-labelledby="morning-digest-heading">
+          <h3 id="morning-digest-heading">Morning Digest</h3>
+          <div class="settings-list">
+            <label class="setting-toggle" for="scheduledDigestToggle">
+              <input id="scheduledDigestToggle" type="checkbox" />
+              <span class="toggle-text">
+                <strong>Scheduled digest</strong>
+                <span>Preview a preferred morning digest schedule.</span>
+              </span>
+            </label>
+            <label class="setting-toggle" for="scheduledDigestTime">
+              <input id="scheduledDigestTime" type="time" value="08:00" />
+              <span class="toggle-text">
+                <strong>Preferred delivery time</strong>
+                <span>This prototype can preview a scheduled digest, but real background sending would require a backend scheduler and email service.</span>
+              </span>
+            </label>
+          </div>
+          <div class="article-actions">
+            <button class="article-action" id="runScheduledDigestButton" type="button">Run Scheduled Digest Now</button>
+          </div>
+          <section class="article-preview" id="scheduledDigestPreview" aria-live="polite" hidden></section>
+        </section>
         </div>
       </section>
 
@@ -1383,6 +1549,12 @@
           <div id="settingsPanelContent"></div>
         </aside>
       </div>
+      <footer class="app-footer">
+        <p>Daily Radar v1.0</p>
+        <p>Built by Molly Atkinson</p>
+        <p>Powered by RSS feeds</p>
+        <p>Front-end prototype</p>
+      </footer>
     </main>
 
     <script>
@@ -1460,6 +1632,12 @@
           interests: ["Sport"],
         },
         {
+          name: "BBC Football",
+          url: "https://feeds.bbci.co.uk/sport/football/rss.xml",
+          interests: ["Sport"],
+          sportInterests: ["Football", "Other Sport"],
+        },
+        {
           name: "Rolling Stone Music",
           url: "https://www.rollingstone.com/music/music-news/feed/",
           interests: ["Music", "Entertainment"],
@@ -1488,7 +1666,20 @@
 
       const subInterestRules = {
         sportInterests: {
-          Football: ["football", "soccer", "premier league", "champions league", "fifa", "uefa"],
+          Football: [
+            "football",
+            "soccer",
+            "world cup",
+            "fifa",
+            "england",
+            "premier league",
+            "champions league",
+            "uefa",
+            "match",
+            "fixture",
+            "group stage",
+            "knockout",
+          ],
           "Formula 1": ["formula 1", "f1", "grand prix", "motorsport", "racing"],
           Netball: ["netball"],
           NFL: ["nfl", "super bowl", "american football"],
@@ -1708,12 +1899,15 @@
       const chipsContainer = document.querySelector("#interestChips");
       const digest = document.querySelector("#digest");
       const message = document.querySelector("#message");
+      const appFeedback = document.querySelector("#appFeedback");
       const generateButton = document.querySelector("#generateButton");
       const digestLoadingPanel = document.querySelector("#digestLoadingPanel");
+      const loadingMessage = document.querySelector("#loadingMessage");
       const welcomeMessage = document.querySelector("#welcomeMessage");
       const readLaterButton = document.querySelector("#readLaterButton");
       const historyButton = document.querySelector("#historyButton");
       const settingsButton = document.querySelector("#settingsButton");
+      const morningDigestButton = document.querySelector("#morningDigestButton");
       const resetPreferencesButton = document.querySelector("#resetPreferencesButton");
       const priorityTopics = document.querySelector("#priorityTopics");
       const priorityList = document.querySelector("#priorityList");
@@ -1723,6 +1917,8 @@
       const backButton = document.querySelector("#backButton");
       const sidebarReadLaterButton = document.querySelector("#sidebarReadLaterButton");
       const sidebarHistoryButton = document.querySelector("#sidebarHistoryButton");
+      const sidebarMorningDigestButton = document.querySelector("#sidebarMorningDigestButton");
+      const sidebarPreviewMorningEmailButton = document.querySelector("#sidebarPreviewMorningEmailButton");
       const articlePreview = document.querySelector("#articlePreview");
       const readLaterLayout = document.querySelector("#readLaterLayout");
       const readLaterBackButton = document.querySelector("#readLaterBackButton");
@@ -1735,12 +1931,19 @@
       const settingsLayout = document.querySelector("#settingsLayout");
       const settingsBackButton = document.querySelector("#settingsBackButton");
       const settingsCardHome = document.querySelector("#settingsCardHome");
-      const settingsCard = document.querySelector(".settings-card");
+      const settingsCard = document.querySelector("#accessibilitySettingsCard");
       const settingsPanelOverlay = document.querySelector("#settingsPanelOverlay");
       const settingsPanelContent = document.querySelector("#settingsPanelContent");
       const settingsPanelClose = document.querySelector("#settingsPanelClose");
       const settingsSaveMessage = document.querySelector("#settingsSaveMessage");
       const accessibilityToggles = document.querySelectorAll("[data-accessibility-setting]");
+      const scheduledDigestToggle = document.querySelector("#scheduledDigestToggle");
+      const scheduledDigestTime = document.querySelector("#scheduledDigestTime");
+      const runScheduledDigestButton = document.querySelector("#runScheduledDigestButton");
+      const scheduledDigestPreview = document.querySelector("#scheduledDigestPreview");
+      const morningDigestCard = document.querySelector("#morningDigestCard");
+      const morningDigestStatusState = document.querySelector("#morningDigestStatusState");
+      const morningDigestStatusTime = document.querySelector("#morningDigestStatusTime");
       const sidebarPriorities = document.querySelector("#sidebarPriorities");
       const sidebarPriorityList = document.querySelector("#sidebarPriorityList");
       const digestSummary = document.querySelector("#digestSummary");
@@ -1750,6 +1953,9 @@
       const searchSuggestions = document.querySelector("#searchSuggestions");
       const searchResultsMessage = document.querySelector("#searchResultsMessage");
       const clearSearchButton = document.querySelector("#clearSearchButton");
+      const nowTrending = document.querySelector("#nowTrending");
+      const trendingExplanation = document.querySelector("#trendingExplanation");
+      const trendingChips = document.querySelector("#trendingChips");
       const briefDate = document.querySelector("#briefDate");
       const articlesAnalysed = document.querySelector("#articlesAnalysed");
       const articlesSelected = document.querySelector("#articlesSelected");
@@ -1803,6 +2009,7 @@
 
       const preferencesKey = "dailyRadarPreferences";
       const accessibilityPreferencesKey = "dailyRadarAccessibilityPreferences";
+      const scheduledDigestKey = "dailyRadarScheduledDigest";
       const savedArticlesKey = "dailyRadarSavedArticles";
       const digestHistoryKey = "dailyRadarDigestHistory";
       const readingGoalKey = "dailyRadarReadingGoal";
@@ -1816,6 +2023,9 @@
         underlineLinks: "accessibility-underline-links",
       };
       let settingsSaveMessageTimer = null;
+      let appFeedbackTimer = null;
+      let loadingMessageTimer = null;
+      let loadingMessageIndex = 0;
       let currentDigestArticles = [];
       let currentDigestGroups = [];
       let currentSearchTerm = "";
@@ -1827,14 +2037,51 @@
         message.classList.remove("error");
       }
 
+      function showActionFeedback(messageText) {
+        appFeedback.textContent = messageText;
+        appFeedback.hidden = false;
+
+        window.clearTimeout(appFeedbackTimer);
+        appFeedbackTimer = window.setTimeout(() => {
+          appFeedback.hidden = true;
+          appFeedback.textContent = "";
+        }, 2000);
+      }
+
+      const loadingMessages = [
+        "📡 Scanning today's headlines...",
+        "📰 Finding articles you'll care about...",
+        "⭐ Ranking your best matches...",
+        "✨ Building your Daily Radar...",
+      ];
+
+      function startLoadingMessages() {
+        window.clearInterval(loadingMessageTimer);
+        loadingMessageIndex = 0;
+        loadingMessage.textContent = loadingMessages[loadingMessageIndex];
+
+        loadingMessageTimer = window.setInterval(() => {
+          loadingMessageIndex = (loadingMessageIndex + 1) % loadingMessages.length;
+          loadingMessage.textContent = loadingMessages[loadingMessageIndex];
+        }, 1000);
+      }
+
+      function stopLoadingMessages() {
+        window.clearInterval(loadingMessageTimer);
+        loadingMessageTimer = null;
+        loadingMessage.textContent = "Building your Daily Radar...";
+      }
+
       function showDigestLoading() {
         digestLoadingPanel.hidden = false;
         digestLoadingPanel.setAttribute("aria-busy", "true");
         generateButton.disabled = true;
         generateButton.textContent = "Generating...";
+        startLoadingMessages();
       }
 
       function hideDigestLoading() {
+        stopLoadingMessages();
         digestLoadingPanel.hidden = true;
         digestLoadingPanel.setAttribute("aria-busy", "false");
         generateButton.disabled = false;
@@ -1878,6 +2125,95 @@
         return atomLink?.getAttribute("href") || "";
       }
 
+      function nodeMatchesLocalName(node, localName) {
+        const nodeName = node.nodeName.toLowerCase();
+        return node.localName === localName || nodeName === localName || nodeName.endsWith(`:${localName}`);
+      }
+
+      function getNamespacedElement(item, localName) {
+        return [...item.getElementsByTagName("*")].find((node) => nodeMatchesLocalName(node, localName));
+      }
+
+      function getNamespacedText(item, localNames) {
+        const match = [...item.getElementsByTagName("*")].find(
+          (node) => localNames.some((localName) => nodeMatchesLocalName(node, localName)) && node.textContent?.trim()
+        );
+        return match?.textContent?.trim() || "";
+      }
+
+      function getImageFromHtml(value) {
+        const doc = new DOMParser().parseFromString(value || "", "text/html");
+        return doc.querySelector("img[src]")?.getAttribute("src") || "";
+      }
+
+      function getRawContent(node, localNames) {
+        const matches = [...node.getElementsByTagName("*")].filter((child) =>
+          localNames.some((localName) => nodeMatchesLocalName(child, localName))
+        );
+
+        for (const match of matches) {
+          const rawContent = match.textContent || match.innerHTML || "";
+
+          if (rawContent.trim()) {
+            return rawContent;
+          }
+        }
+
+        return "";
+      }
+
+      function normalizeArticleImageUrl(imageUrl, sourceUrl) {
+        const cleanImageUrl = imageUrl?.trim();
+
+        if (!cleanImageUrl) {
+          return "";
+        }
+
+        try {
+          return new URL(cleanImageUrl, sourceUrl).href;
+        } catch {
+          return cleanImageUrl;
+        }
+      }
+
+      function getArticleImageUrl(item) {
+        const mediaThumbnail = getNamespacedElement(item, "thumbnail")?.getAttribute("url");
+
+        if (mediaThumbnail) {
+          return mediaThumbnail;
+        }
+
+        const mediaContent = [...item.getElementsByTagName("*")].find(
+          (node) =>
+            nodeMatchesLocalName(node, "content") &&
+            node.getAttribute("url") &&
+            (node.getAttribute("medium") === "image" ||
+              node.getAttribute("type")?.startsWith("image/") ||
+              /\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(node.getAttribute("url")))
+        );
+
+        if (mediaContent) {
+          return mediaContent.getAttribute("url");
+        }
+
+        const imageEnclosure = [...item.querySelectorAll("enclosure[url]")].find((node) =>
+          node.getAttribute("type")?.startsWith("image/")
+        );
+
+        if (imageEnclosure) {
+          return imageEnclosure.getAttribute("url");
+        }
+
+        const imageNode = getNamespacedElement(item, "image");
+        const imageUrl = imageNode?.getAttribute("url") || imageNode?.getAttribute("href") || getTextContent(item, ["image url", "image"]);
+
+        if (imageUrl) {
+          return imageUrl;
+        }
+
+        return getImageFromHtml(getRawContent(item, ["description", "summary", "content", "encoded"]));
+      }
+
       function getRelativePublishedTime(dateValue) {
         const publishedDate = new Date(dateValue);
 
@@ -1915,6 +2251,10 @@
           .map(([topic]) => topic);
       }
 
+      function mergeFeedSubInterests(feed, fieldName, detectedInterests) {
+        return [...new Set([...(feed[fieldName] || []), ...detectedInterests])];
+      }
+
       function textMatchesTopic(text, topic) {
         const lowerText = text.toLowerCase();
         const keywords = mainInterestRules[topic] || [];
@@ -1923,22 +2263,17 @@
       }
 
       function getArticleText(article) {
-        return `${article.title || ""} ${article.summary || ""} ${article.categoryText || ""} ${article.source || ""}`;
+        return `${article.title || ""} ${article.summary || ""} ${article.categoryText || ""} ${article.reason || ""}`;
+      }
+
+      function articleMatchesTopic(article, topic) {
+        const explicitFeedMatch =
+          article.primaryInterest === topic || (article.isFallback && (article.interests || []).includes(topic));
+        return explicitFeedMatch || textMatchesTopic(getArticleText(article), topic);
       }
 
       function articleMatchesMainInterest(article, interest) {
-        if (article.isFallback) {
-          return (
-            article.interests.includes(interest) &&
-            (article.interests[0] === interest || textMatchesTopic(getArticleText(article), interest))
-          );
-        }
-
-        if (!article.interests.includes(interest)) {
-          return false;
-        }
-
-        return article.primaryInterest === interest || textMatchesTopic(getArticleText(article), interest);
+        return articleMatchesTopic(article, interest);
       }
 
       function buildRssArticle(item, feed) {
@@ -1951,14 +2286,19 @@
 
         const rawSummary = getTextContent(item, ["description", "summary", "content"]);
         const summary = stripHtml(rawSummary) || "No summary was provided by this RSS feed.";
+        const imageUrl = normalizeArticleImageUrl(getArticleImageUrl(item), sourceUrl);
         const publishedAt = getTextContent(item, ["pubDate", "published", "updated"]);
         const categoryText = [...item.querySelectorAll("category")].map((node) => node.textContent).join(" ");
         const searchableText = `${title} ${summary} ${categoryText}`;
         const interests = [...new Set(feed.interests)];
-        const sportInterests = detectSubInterests(searchableText, "sportInterests");
-        const musicInterests = detectSubInterests(searchableText, "musicInterests");
-        const entertainmentInterests = detectSubInterests(searchableText, "entertainmentInterests");
-        const booksInterests = detectSubInterests(searchableText, "booksInterests");
+        const sportInterests = mergeFeedSubInterests(feed, "sportInterests", detectSubInterests(searchableText, "sportInterests"));
+        const musicInterests = mergeFeedSubInterests(feed, "musicInterests", detectSubInterests(searchableText, "musicInterests"));
+        const entertainmentInterests = mergeFeedSubInterests(
+          feed,
+          "entertainmentInterests",
+          detectSubInterests(searchableText, "entertainmentInterests")
+        );
+        const booksInterests = mergeFeedSubInterests(feed, "booksInterests", detectSubInterests(searchableText, "booksInterests"));
         const matchedMainInterests = interests.filter(
           (interest, index) => index === 0 || textMatchesTopic(searchableText, interest)
         );
@@ -1982,6 +2322,7 @@
           entertainmentInterests,
           booksInterests,
           sourceUrl,
+          imageUrl,
           publishedAt,
           publishedAgo: getRelativePublishedTime(publishedAt),
           readingMinutes: estimateReadingMinutes(title, summary),
@@ -2065,6 +2406,10 @@
       }
 
       function useFallbackArticles() {
+        if (rssArticles.length > 0) {
+          return;
+        }
+
         usingFallbackArticles = true;
         mockArticles = fallbackMockArticles;
         feedDebug.articlesFound = mockArticles.length;
@@ -2212,6 +2557,7 @@
         clearAllSelections();
         welcomeMessage.hidden = true;
         clearMessage();
+        showActionFeedback("Preferences reset.");
       }
 
       function getAccessibilityPreferences() {
@@ -2241,7 +2587,7 @@
         window.clearTimeout(settingsSaveMessageTimer);
         settingsSaveMessageTimer = window.setTimeout(() => {
           settingsSaveMessage.hidden = true;
-        }, 1800);
+        }, 2000);
       }
 
       function applyAccessibilityPreferences(preferences) {
@@ -2264,6 +2610,67 @@
         saveAccessibilityPreferences(preferences);
         applyAccessibilityPreferences(preferences);
         showSettingsSavedMessage("Accessibility preferences saved");
+      }
+
+      function saveScheduledDigestSettings() {
+        localStorage.setItem(
+          scheduledDigestKey,
+          JSON.stringify({
+            enabled: scheduledDigestToggle.checked,
+            time: scheduledDigestTime.value || "08:00",
+          })
+        );
+        renderMorningDigestStatus();
+        showSettingsSavedMessage("Morning Digest settings saved");
+      }
+
+      function renderMorningDigestStatus() {
+        morningDigestStatusState.textContent = `Morning Digest: ${scheduledDigestToggle.checked ? "On" : "Off"}`;
+        morningDigestStatusTime.textContent = `Delivery time: ${scheduledDigestTime.value || "08:00"}`;
+      }
+
+      function restoreScheduledDigestSettings() {
+        const savedSettings = localStorage.getItem(scheduledDigestKey);
+
+        if (!savedSettings) {
+          renderMorningDigestStatus();
+          return;
+        }
+
+        try {
+          const settings = JSON.parse(savedSettings);
+          scheduledDigestToggle.checked = Boolean(settings.enabled);
+          scheduledDigestTime.value = settings.time || "08:00";
+        } catch {
+          localStorage.removeItem(scheduledDigestKey);
+        }
+        renderMorningDigestStatus();
+      }
+
+      function renderScheduledDigestPreview() {
+        const articles = currentDigestArticles.slice(0, 5);
+        const articleItems =
+          articles.length === 0
+            ? "<li>No current digest articles yet. Generate a digest first, then run this preview.</li>"
+            : articles.map((article) => `<li>${escapeHtml(getDisplayTitle(article))}</li>`).join("");
+
+        scheduledDigestPreview.hidden = false;
+        scheduledDigestPreview.innerHTML = `
+          <span class="section-label">Preview only — no email has been sent.</span>
+          <h2>Morning Digest Preview</h2>
+          <p class="summary">Scheduled for ${escapeHtml(scheduledDigestTime.value || "08:00")}.</p>
+          <ol class="history-detail-list">${articleItems}</ol>
+        `;
+      }
+
+      function showMorningDigestSettings() {
+        showSettings();
+        morningDigestCard.scrollIntoView({ behavior: getScrollBehavior(), block: "start" });
+      }
+
+      function previewMorningEmail() {
+        showMorningDigestSettings();
+        renderScheduledDigestPreview();
       }
 
       function getScrollBehavior() {
@@ -2326,6 +2733,7 @@
         saveSavedArticles();
         updateSaveButtons();
         renderReadLater();
+        showActionFeedback("Saved to Read Later.");
       }
 
       function removeSavedArticle(articleId) {
@@ -2333,6 +2741,7 @@
         saveSavedArticles();
         updateSaveButtons();
         renderReadLater();
+        showActionFeedback("Removed from Read Later.");
       }
 
       function getSourceLinkMarkup(article) {
@@ -2936,7 +3345,7 @@
 
       function getArticleTopics(article) {
         return [...new Set([
-          ...article.interests.filter((interest) => articleMatchesMainInterest(article, interest)),
+          ...(article.interests || []).filter((interest) => articleMatchesMainInterest(article, interest)),
           ...(article.sportInterests || []),
           ...(article.musicInterests || []),
           ...(article.entertainmentInterests || []),
@@ -3032,7 +3441,7 @@
                 (article.priorityMatches.some((topic) => topic === group.label || group.subtopics.includes(topic)) ? 10 : 0),
             }))
             .filter((item) => item.score > 0)
-            .sort((first, second) => second.score - first.score)[0]?.group || groups[0]
+            .sort((first, second) => second.score - first.score)[0]?.group || null
         );
       }
 
@@ -3171,6 +3580,10 @@
         return getDisplayMatches(article)[0] || getArticleTopics(article)[0] || "Daily Radar";
       }
 
+      function renderArticleTopicIcon(primaryTopic) {
+        return `<span class="article-topic-icon" aria-hidden="true">${getTopicIcon(primaryTopic)}</span>`;
+      }
+
       function getTopicCoverage(matchingArticles) {
         if (matchingArticles.length === 0) {
           return [];
@@ -3278,6 +3691,63 @@
         });
       }
 
+      function getRadarScoreLabel(score) {
+        if (score >= 85) {
+          return "Excellent Match";
+        }
+
+        if (score >= 65) {
+          return "Good Match";
+        }
+
+        if (score >= 40) {
+          return "Partial Match";
+        }
+
+        return "Weak Match";
+      }
+
+      function getFreshnessScore(article) {
+        const publishedDate = new Date(article.publishedAt);
+
+        if (Number.isNaN(publishedDate.getTime())) {
+          return 0;
+        }
+
+        const ageHours = Math.max(0, (Date.now() - publishedDate.getTime()) / 3600000);
+
+        if (ageHours <= 24) {
+          return 10;
+        }
+
+        if (ageHours <= 72) {
+          return 7;
+        }
+
+        if (ageHours <= 168) {
+          return 4;
+        }
+
+        return 1;
+      }
+
+      function getRadarScore(article) {
+        const mainInterestMatches = (article.matches || []).filter((match) => selectedInterests.has(match)).length;
+        const subInterestMatches = (article.matches || []).length - mainInterestMatches;
+        const priorityMatches = (article.priorityMatches || []).length;
+        const rawScore =
+          Math.min(mainInterestMatches, 2) * 28 +
+          Math.min(subInterestMatches, 3) * 12 +
+          Math.min(priorityMatches, 2) * 14 +
+          getFreshnessScore(article);
+        const percent = Math.max(15, Math.min(100, rawScore));
+
+        return {
+          percent,
+          label: getRadarScoreLabel(percent),
+        };
+      }
+
       function renderArticleCard(article) {
         const card = document.createElement("article");
         card.className = "article-card";
@@ -3288,17 +3758,19 @@
         const isSaved = savedArticleIds.has(articleId);
         const publishedAgo = article.publishedAgo || "Today";
         const readingMinutes = article.readingMinutes || 4;
+        const radarScore = getRadarScore(article);
         const sourceLink = article.sourceUrl
           ? `<a class="article-action" href="${escapeHtml(article.sourceUrl)}" target="_blank" rel="noopener noreferrer">Open Source</a>`
           : "";
 
         card.innerHTML = `
           <div class="article-card-header">
-            <span class="article-topic-icon" aria-hidden="true">${getTopicIcon(primaryTopic)}</span>
+            ${renderArticleTopicIcon(primaryTopic)}
             <div>
               <h2>${escapeHtml(getDisplayTitle(article))}</h2>
               <p class="source">${escapeHtml(article.source)}</p>
               <p class="article-timing">${escapeHtml(publishedAgo)} · ${readingMinutes} min read</p>
+              <p class="radar-score">Radar Score: ${radarScore.percent}% · ${escapeHtml(radarScore.label)}</p>
             </div>
           </div>
           <p class="summary">${escapeHtml(article.summary)}</p>
@@ -3326,8 +3798,24 @@
         return card;
       }
 
+      function sortDigestArticles(articles) {
+        return [...articles].sort(
+          (first, second) => {
+            const firstPublished = new Date(first.publishedAt).getTime() || 0;
+            const secondPublished = new Date(second.publishedAt).getTime() || 0;
+
+            return (
+              second.score - first.score ||
+              secondPublished - firstPublished ||
+              getDisplayTitle(first).localeCompare(getDisplayTitle(second))
+            );
+          }
+        );
+      }
+
       function findMatchingArticles() {
-        return mockArticles
+        return sortDigestArticles(
+          mockArticles
           .map((article) => {
             const interestMatches = [...selectedInterests].filter((interest) =>
               articleMatchesMainInterest(article, interest)
@@ -3360,13 +3848,7 @@
             return { ...article, matches, priorityMatches, score };
           })
           .filter((article) => article.matches.length > 0)
-          .sort(
-            (first, second) =>
-              second.score - first.score ||
-              second.priorityMatches.length - first.priorityMatches.length ||
-              second.matches.length - first.matches.length
-          )
-          .slice(0, 5);
+        ).slice(0, 5);
       }
 
       function getArticleSearchText(article) {
@@ -3381,27 +3863,120 @@
           .toLowerCase();
       }
 
-      function getVisibleDigestKeywords() {
-        const stopWords = new Set([
+      function getDigestStopWords() {
+        return new Set([
+          "able",
           "about",
+          "also",
           "after",
           "again",
+          "amid",
+          "among",
+          "and",
+          "are",
           "article",
+          "been",
+          "but",
+          "can",
+          "could",
           "daily",
+          "for",
           "from",
+          "has",
           "have",
+          "how",
           "into",
+          "its",
           "more",
           "news",
+          "new",
+          "now",
           "only",
+          "our",
           "preview",
+          "says",
+          "the",
           "that",
           "their",
+          "they",
           "this",
+          "through",
           "today",
+          "was",
+          "will",
           "with",
           "while",
+          "your",
         ]);
+      }
+
+      function formatTrendingKeyword(keyword) {
+        if (keyword === "ai" || keyword === "f1") {
+          return keyword.toUpperCase();
+        }
+
+        return keyword
+          .split("-")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(" ");
+      }
+
+      function getTrendingTopics(articles) {
+        if (articles.length < 3) {
+          return [];
+        }
+
+        const stopWords = getDigestStopWords();
+        const counts = new Map();
+
+        articles.forEach((article) => {
+          const words = getArticleSearchText(article).match(/[a-z0-9][a-z0-9-]{1,}/g) || [];
+          const uniqueArticleWords = new Set(
+            words.filter((word) => (word.length >= 3 || word === "ai" || word === "f1") && !stopWords.has(word))
+          );
+
+          uniqueArticleWords.forEach((word) => {
+            counts.set(word, (counts.get(word) || 0) + 1);
+          });
+        });
+
+        const repeatedKeywords = [...counts.entries()]
+          .filter(([, count]) => count >= 2)
+          .sort((first, second) => second[1] - first[1] || first[0].localeCompare(second[0]))
+          .slice(0, 6);
+
+        return repeatedKeywords.length >= 3 ? repeatedKeywords.map(([keyword]) => keyword) : [];
+      }
+
+      function renderNowTrending(articles) {
+        const trendingTopics = getTrendingTopics(articles);
+
+        nowTrending.hidden = false;
+        trendingChips.innerHTML = "";
+
+        if (trendingTopics.length === 0) {
+          trendingExplanation.textContent = "Not enough articles to detect trends yet.";
+          return;
+        }
+
+        trendingExplanation.textContent = "Trending topics are based on repeated keywords in today's loaded articles.";
+        trendingTopics.forEach((keyword) => {
+          const button = document.createElement("button");
+
+          button.type = "button";
+          button.className = "trending-chip";
+          button.textContent = formatTrendingKeyword(keyword);
+          button.setAttribute("aria-label", `Search digest for ${formatTrendingKeyword(keyword)}`);
+          button.addEventListener("click", () => {
+            digestSearchInput.value = keyword;
+            applyDigestSearch(keyword);
+          });
+          trendingChips.appendChild(button);
+        });
+      }
+
+      function getVisibleDigestKeywords() {
+        const stopWords = getDigestStopWords();
         const counts = new Map();
 
         currentDigestArticles.forEach((article) => {
@@ -3509,7 +4084,7 @@
         const groupedArticles = new Map(currentDigestGroups.map((group) => [group.label, []]));
         const groupsToRender = isSearching
           ? currentDigestGroups.filter((group) =>
-              articles.some((article) => getArticleGroup(article, currentDigestGroups).label === group.label)
+              articles.some((article) => getArticleGroup(article, currentDigestGroups)?.label === group.label)
             )
           : currentDigestGroups;
 
@@ -3517,7 +4092,10 @@
 
         articles.forEach((article) => {
           const group = getArticleGroup(article, currentDigestGroups);
-          groupedArticles.get(group.label).push(article);
+
+          if (group) {
+            groupedArticles.get(group.label).push(article);
+          }
         });
 
         renderSidebar(groupsToRender.length > 0 ? groupsToRender : currentDigestGroups, groupedArticles);
@@ -3559,7 +4137,7 @@
             emptyTopicCard.className = "article-card";
             emptyTopicCard.innerHTML = `
               <h2>Little ${group.label} coverage today</h2>
-              <p class="summary">There is limited RSS coverage${subtopicText} in this generated digest. Try another related interest or check again later.</p>
+              <p class="summary">No strong matches found for ${escapeHtml(group.label)} today.${subtopicText ? ` Try another related interest or check again later.` : ""}</p>
             `;
             articleList.appendChild(emptyTopicCard);
           } else {
@@ -3593,6 +4171,8 @@
         articlePreview.hidden = true;
         articlePreview.innerHTML = "";
         digestAnalytics.hidden = true;
+        nowTrending.hidden = true;
+        trendingChips.innerHTML = "";
         coverageList.innerHTML = "";
         radarSummary.textContent = "";
         feedStatusMessage.textContent = "";
@@ -3649,6 +4229,7 @@
 
         renderSidebarPriorities();
         renderMorningBrief(matchingArticles);
+        renderNowTrending(matchingArticles);
         renderDigestAnalytics(matchingArticles);
         renderFeedStatus();
 
@@ -3680,6 +4261,8 @@
         articlePreview.hidden = true;
         articlePreview.innerHTML = "";
         digestAnalytics.hidden = true;
+        nowTrending.hidden = true;
+        trendingChips.innerHTML = "";
         coverageList.innerHTML = "";
         radarSummary.textContent = "";
         readLaterPreview.hidden = true;
@@ -3695,6 +4278,7 @@
       createEntertainmentSubInterestChips();
       createBooksSubInterestChips();
       restoreAccessibilityPreferences();
+      restoreScheduledDigestSettings();
       restorePreferences();
       generateButton.addEventListener("click", renderDigest);
       backButton.addEventListener("click", showInterestEditor);
@@ -3706,6 +4290,9 @@
       sidebarHistoryButton.addEventListener("click", showDigestHistory);
       historyBackButton.addEventListener("click", showInterestEditor);
       settingsButton.addEventListener("click", showSettings);
+      morningDigestButton.addEventListener("click", showMorningDigestSettings);
+      sidebarMorningDigestButton.addEventListener("click", showMorningDigestSettings);
+      sidebarPreviewMorningEmailButton.addEventListener("click", previewMorningEmail);
       settingsBackButton.addEventListener("click", showInterestEditor);
       digestSettingsButton.addEventListener("click", openDigestSettingsPanel);
       settingsPanelClose.addEventListener("click", closeDigestSettingsPanel);
@@ -3767,6 +4354,9 @@
           updateAccessibilityPreference(toggle.dataset.accessibilitySetting, toggle.checked);
         });
       });
+      scheduledDigestToggle.addEventListener("change", saveScheduledDigestSettings);
+      scheduledDigestTime.addEventListener("change", saveScheduledDigestSettings);
+      runScheduledDigestButton.addEventListener("click", renderScheduledDigestPreview);
     </script>
   </body>
 </html>
